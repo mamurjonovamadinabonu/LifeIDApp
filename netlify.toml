@@ -1,0 +1,8 @@
+[build]
+  publish = "life_id-main"
+  command = ""
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
