@@ -5,12 +5,11 @@ import requests
 TOKEN = '8846453658:AAGfw0FFtP28tUzFY7QazAyIZJ0h2rghP64'
 bot = telebot.TeleBot(TOKEN)
 
-WEBAPP_URL = 'http://localhost:8080' # Can be replaced with ngrok URL when deployed publicly
+WEBAPP_URL = 'http://localhost:8080'
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     markup = InlineKeyboardMarkup()
-    # WebApp button to open LifeID Shifokor Portali
     markup.add(InlineKeyboardButton("🏥 LifeID Portalni ochish", web_app=WebAppInfo(url=WEBAPP_URL)))
     markup.add(InlineKeyboardButton("🔍 Donor qidirish", callback_data='search_donor'))
     markup.add(InlineKeyboardButton("🤖 Gemini AI Tibbiy Maslahat", callback_data='ai_help'))
@@ -30,12 +29,11 @@ def callback_query(call):
         bot.send_message(call.message.chat.id, "🔍 **Donor qidirish:**\nQon guruhi bo'yicha donor topish uchun LifeID Portaliga kiring va Donor bazasi bo'limidan foydalaning.", parse_mode='Markdown')
     elif call.data == 'ai_help':
         bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, "🤖 **Gemini AI Tibbiy Yordamchi:**\nIltimos, dori vositasi, tashxis yoki alomatlar bo'yicha savolingizni yozib yuboring (masalan: *'Aspirin va Penitsillin allergiyasi haqida nima deysiz?'*).", parse_mode='Markdown')
+        bot.send_message(call.message.chat.id, "🤖 **Gemini AI Tibbiy Yordamchi:**\nIltimos, dori vositasi, tashxis yoki alomatlar bo'yicha savolingizni yozib yuboring.", parse_mode='Markdown')
 
 @bot.message_handler(func=lambda message: True)
 def gemini_bot_chat(message):
     user_text = message.text
-    # Simulate / call Gemini expert medical response in Uzbek
     response_text = (
         f"🤖 **Gemini AI (LifeID Assistant) tahlili:**\n\n"
         f"Sizning savolingiz: *\"{user_text}\"*\n\n"
@@ -47,4 +45,3 @@ def gemini_bot_chat(message):
 if __name__ == '__main__':
     print("LifeID Telegram Bot ishga tushdi...")
     bot.infinity_polling()
-</div>

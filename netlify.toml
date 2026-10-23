@@ -1,5 +1,5 @@
 [build]
-  publish = "life_id-main"
+  publish = "."
   command = ""
 
 [[redirects]]
