@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.LifeIDDoctorPortal" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your theme here -->
+        <item name="colorPrimary">#C5192D</item>
+    </style>
+</resources>

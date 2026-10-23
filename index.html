@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LifeID — Tibbiy Identifikatsiya & Shifokor Portali</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="db.js"></script>
 <script src="gemini.js"></script>
-<script src="telegram.js"></script>
 <script src="scanner.js"></script>
 <style>
 :root {
@@ -428,7 +426,6 @@ let currentFpId = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
   await window.LifeIDDB.init();
-  window.TelegramBridge.init();
   checkDoctorAuth();
   loadDashboard();
 });
