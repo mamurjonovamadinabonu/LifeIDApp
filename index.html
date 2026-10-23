@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeID — Shifokor Portali & Admin Panel</title>
+<title>LifeID — Shifokor Portali</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="db.js"></script>
@@ -35,6 +35,19 @@
 html { font-size: 15px; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
+/* DOCTOR LOGIN OVERLAY */
+.login-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(8, 80, 65, 0.92); z-index: 2000;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.login-card {
+  background: var(--surface); width: 100%; max-width: 440px;
+  border-radius: 20px; padding: 36px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.login-title { font-size: 22px; font-weight: 600; color: var(--green-dark); margin-bottom: 6px; }
+.login-subtitle { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+
 /* SIDEBAR */
 .sidebar {
   width: var(--sidebar-w); background: var(--green-dark); min-height: 100vh;
@@ -43,14 +56,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .logo-mark { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -0.5px; }
 .logo-mark span { color: var(--green-mid); }
-.logo-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; letter-spacing: 0.3px; }
+.logo-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
 
 .nav { padding: 16px 12px; flex: 1; }
 .nav-section { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; padding: 0 12px; margin: 16px 0 6px; }
 .nav-item {
   display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px;
-  font-size: 13.5px; font-weight: 400; color: rgba(255,255,255,0.6);
-  cursor: pointer; transition: all 0.15s; margin-bottom: 2px; text-decoration: none;
+  font-size: 13.5px; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.15s; margin-bottom: 2px; text-decoration: none;
 }
 .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
 .nav-item.active { background: rgba(157,225,203,0.2); color: var(--green-mid); font-weight: 500; }
@@ -64,6 +76,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 }
 .doctor-name { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.85); }
 .doctor-role { font-size: 11px; color: rgba(255,255,255,0.4); }
+.logout-btn { background: none; border: none; color: var(--green-mid); font-size: 11px; cursor: pointer; margin-top: 4px; text-decoration: underline; }
 
 /* MAIN */
 .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
@@ -231,11 +244,40 @@ textarea { resize: vertical; min-height: 80px; }
 </head>
 <body>
 
+<!-- DOCTOR LOGIN OVERLAY (STRICT AUTHORIZATION) -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-title">LifeID Shifokor Portali</div>
+    <div class="login-subtitle">Tizimga kirish uchun shifokor ma'lumotlarini kiriting</div>
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div class="field">
+        <label>Shifokor F.I.O. <span class="req">*</span></label>
+        <input type="text" id="loginName" placeholder="Dr. Alisher Karimov" />
+      </div>
+      <div class="field">
+        <label>Mutaxassislik <span class="req">*</span></label>
+        <input type="text" id="loginSpec" placeholder="Kardiolog / Xirurg / Terapevt" />
+      </div>
+      <div class="field">
+        <label>Shifoxona / Hudud <span class="req">*</span></label>
+        <input type="text" id="loginClinic" placeholder="Toshkent 1-son shifoxona" />
+      </div>
+      <div class="field">
+        <label>Shifokor PIN kodi / ID <span class="req">*</span></label>
+        <input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono'" />
+      </div>
+      <button class="btn-primary" style="justify-content:center; margin-top:10px; width:100%; padding:12px;" onclick="handleDoctorLogin()">
+        Tizimga kirish (Avtorizatsiya)
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">Life<span>ID</span></div>
-    <div class="logo-sub">Shifokor portali · Maxfiylik & Admin</div>
+    <div class="logo-sub">Shifokor portali · Xavfsiz</div>
   </div>
   <nav class="nav">
     <div class="nav-section">Asosiy</div>
@@ -259,7 +301,7 @@ textarea { resize: vertical; min-height: 80px; }
     </a>
     <a class="nav-item" href="#" onclick="switchView('usersList', this)">
       <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Foydalanuvchilar
+      Shifokor Profili
     </a>
     <a class="nav-item" href="#" onclick="switchView('historyList', this)">
       <svg viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2ZM8 5v4l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -271,8 +313,9 @@ textarea { resize: vertical; min-height: 80px; }
     <div class="doctor-badge">
       <div class="doctor-avatar" id="doctorAvatar">JK</div>
       <div>
-        <div class="doctor-name" id="doctorNameLabel">Dr. Jasur Karimov</div>
-        <div class="doctor-role" id="doctorIdLabel">ID: Shifokor</div>
+        <div class="doctor-name" id="doctorNameLabel">Dr. Jasur</div>
+        <div class="doctor-role" id="doctorIdLabel">Kardiolog</div>
+        <button class="logout-btn" onclick="window.LifeIDDB.logoutDoctor()">Chiqish</button>
       </div>
     </div>
   </div>
@@ -283,8 +326,8 @@ textarea { resize: vertical; min-height: 80px; }
   <div class="topbar">
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-right">
-      <div class="topbar-badge" id="modeBadge" onclick="toggleAdminMode()" title="Rejimni almashtirish (Shifokor / Admin)">
-        👤 Shifokor rejimi (Faqat o'zimniki)
+      <div class="topbar-badge" id="modeBadge" onclick="toggleAdminMode()" title="Admin / Shifokor rejimi">
+        👤 Shifokor rejimi
       </div>
     </div>
   </div>
@@ -295,7 +338,7 @@ textarea { resize: vertical; min-height: 80px; }
     <div id="view-dashboard" class="view-section active-view">
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Bemorlarim (Sizniki)</div>
+          <div class="stat-label">Bemorlarim</div>
           <div class="stat-value" id="statTotalPatients">0</div>
         </div>
         <div class="stat-card">
@@ -307,8 +350,8 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="stat-value" id="statScanned">0</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Maxfiylik</div>
-          <div class="stat-value" style="color:var(--green)">100% Secure</div>
+          <div class="stat-label">Status</div>
+          <div class="stat-value" style="color:var(--green)">Faol</div>
         </div>
       </div>
 
@@ -325,7 +368,7 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="form-body" style="padding:0;">
           <table class="data-table">
             <thead>
-              <tr><th>F.I.O.</th><th>Tug'ilgan sana</th><th>Qon guruhi</th><th>Telefon</th><th>Kiritgan ID</th></tr>
+              <tr><th>F.I.O.</th><th>Tug'ilgan sana</th><th>Qon guruhi</th><th>Telefon</th></tr>
             </thead>
             <tbody id="dashboardTableBody"></tbody>
           </table>
@@ -509,7 +552,7 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="form-body" style="padding:0;">
           <table class="data-table">
             <thead>
-              <tr><th>F.I.O.</th><th>Pasport</th><th>Tug'ilgan sana</th><th>Qon guruhi</th><th>Telefon</th><th>Kiritgan ID</th><th>Amal</th></tr>
+              <tr><th>F.I.O.</th><th>Pasport</th><th>Tug'ilgan sana</th><th>Qon guruhi</th><th>Telefon</th><th>Amal</th></tr>
             </thead>
             <tbody id="fullPatientsTableBody"></tbody>
           </table>
@@ -532,7 +575,7 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="form-body" style="padding:0;">
           <table class="data-table">
             <thead>
-              <tr><th>F.I.O.</th><th>Qon guruhi</th><th>Rezus</th><th>Telefon</th><th>Manzil</th><th>Muallif</th></tr>
+              <tr><th>F.I.O.</th><th>Qon guruhi</th><th>Rezus</th><th>Telefon</th><th>Manzil</th></tr>
             </thead>
             <tbody id="donorsTableBody"></tbody>
           </table>
@@ -548,24 +591,17 @@ textarea { resize: vertical; min-height: 80px; }
             <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.4"/></svg>
           </div>
           <div>
-            <div class="form-section-title">Foydalanuvchilar va Admin Panel</div>
-            <div class="form-section-desc">Tizimdagi shifokorlar va rol boshqaruvi</div>
+            <div class="form-section-title">Shifokor Profili</div>
+            <div class="form-section-desc">Tizimdagi joriy shifokor ma'lumotlari</div>
           </div>
         </div>
         <div class="form-body">
-          <div style="margin-bottom:16px; padding:16px; background:var(--surface-2); border-radius:10px;">
-            <b>Sizning shaxsiy User ID'ingiz:</b> <span id="currentUserIdDisplay" style="font-family:'DM Mono'; color:var(--green)"></span>
-            <div style="font-size:12px; color:var(--text-3); margin-top:4px;">Ma'lumotlaringiz faqat shu ID orqali sizga ko'rsatiladi va boshqa shifokorlardan sir saqlanadi.</div>
+          <div style="padding:20px; background:var(--surface-2); border-radius:12px;">
+            <h3 id="profileDocName" style="font-size:18px; margin-bottom:6px; color:var(--green-dark)">Dr. Jasur Karimov</h3>
+            <p id="profileDocSpec" style="font-size:14px; color:var(--text-2); margin-bottom:4px;">Kardiolog</p>
+            <p id="profileDocClinic" style="font-size:13px; color:var(--text-3); margin-bottom:14px;">Toshkent 1-son shifoxona</p>
+            <button class="btn-secondary" onclick="window.LifeIDDB.logoutDoctor()">Tizimdan chiqish (Logout)</button>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr><th>Shifokor / Foydalanuvchi</th><th>Rol</th><th>ID</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><b>Siz (joriy foydalanuvchi)</b></td><td>Shifokor / Admin</td><td id="tableUserIdCol">-</td><td><span style="color:var(--green)">Faol (Maxfiy)</span></td></tr>
-              <tr><td><b>Dr. Jasur Karimov</b></td><td>Bosh shifokor</td><td>doc_admin</td><td><span style="color:var(--green)">Faol</span></td></tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -585,7 +621,7 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="form-body" style="padding:0;">
           <table class="data-table">
             <thead>
-              <tr><th>Amal</th><th>Tafsilotlar</th><th>Foydalanuvchi ID</th><th>Vaqt</th></tr>
+              <tr><th>Amal</th><th>Tafsilotlar</th><th>Vaqt</th></tr>
             </thead>
             <tbody id="historyTableBody"></tbody>
           </table>
@@ -640,15 +676,57 @@ window.addEventListener('DOMContentLoaded', async () => {
   await window.LifeIDDB.init();
   window.TelegramBridge.init();
 
-  const uid = window.LifeIDDB.currentUserId;
-  document.getElementById('currentUserIdDisplay').textContent = uid;
-  document.getElementById('tableUserIdCol').textContent = uid;
-  document.getElementById('doctorIdLabel').textContent = 'ID: ' + uid.substring(0, 10);
-
+  checkDoctorAuth();
   loadDashboardData();
 });
 
+function checkDoctorAuth() {
+  const doc = window.LifeIDDB.currentDoctor;
+  const overlay = document.getElementById('loginOverlay');
+  if (!doc) {
+    overlay.style.display = 'flex';
+  } else {
+    overlay.style.display = 'none';
+    document.getElementById('doctorNameLabel').textContent = doc.name;
+    document.getElementById('doctorAvatar').textContent = doc.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('doctorIdLabel').textContent = doc.spec;
+    document.getElementById('profileDocName').textContent = doc.name;
+    document.getElementById('profileDocSpec').textContent = doc.spec;
+    document.getElementById('profileDocClinic').textContent = doc.clinic;
+  }
+}
+
+function handleDoctorLogin() {
+  const name = document.getElementById('loginName').value.trim();
+  const spec = document.getElementById('loginSpec').value.trim();
+  const clinic = document.getElementById('loginClinic').value.trim();
+  const pin = document.getElementById('loginPin').value.trim();
+
+  if (!name || !spec || !clinic || !pin) {
+    alert('Iltimos, barcha maydonlarni to\'ldiring!');
+    return;
+  }
+
+  const doctorData = {
+    id: 'doc_' + Date.now(),
+    name,
+    spec,
+    clinic,
+    role: pin === '7777' ? 'admin' : 'doctor' // PIN 7777 for admin mode
+  };
+
+  window.LifeIDDB.loginDoctor(doctorData);
+  checkDoctorAuth();
+  loadDashboardData();
+  showToast("Xush kelibsiz, " + name + "!");
+}
+
 function toggleAdminMode() {
+  const doc = window.LifeIDDB.currentDoctor;
+  if (!doc || doc.role !== 'admin') {
+    alert('Admin rejimiga kirish uchun maxfiy PIN (7777) bilan kirishingiz kerak!');
+    return;
+  }
   isAdminMode = !isAdminMode;
   const badge = document.getElementById('modeBadge');
   if (isAdminMode) {
@@ -658,8 +736,6 @@ function toggleAdminMode() {
     badge.className = 'topbar-badge';
     badge.textContent = '👤 Shifokor rejimi (Faqat o\'zimniki)';
   }
-
-  // Reload active view
   const activeView = document.querySelector('.view-section.active-view').id.replace('view-', '');
   switchView(activeView, null);
 }
@@ -674,11 +750,11 @@ function switchView(viewName, el) {
   }
 
   const titles = {
-    dashboard: "Dashboard" + (isAdminMode ? " [ADMIN PANEL]" : " [Shifokor]"),
+    dashboard: "Dashboard",
     addPatient: "Yangi bemor qo'shish",
-    patientsList: "Bemorlar ro'yxati" + (isAdminMode ? " [Barchasi]" : " [Faqat o'zimniki]"),
+    patientsList: "Bemorlar ro'yxati",
     donorsList: "Donorlar bazasi",
-    usersList: "Foydalanuvchilar va Admin Panel",
+    usersList: "Shifokor Profili",
     historyList: "Tarix va audit"
   };
   document.getElementById('topbarTitle').textContent = titles[viewName];
@@ -701,20 +777,18 @@ async function loadDashboardData() {
   tbody.innerHTML = '';
   patients.slice(-5).reverse().forEach(p => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${p.lastName} ${p.firstName}</b></td><td>${p.birthDate}</td><td>${p.bloodGroup} ${p.rhesus}</td><td>${p.contacts?.[0]?.phone || '-'}</td><td style="font-family:'DM Mono';font-size:12px;color:var(--text-3);">${p.createdBy || 'Bilinmaydi'}</td>`;
+    tr.innerHTML = `<td><b>${p.lastName} ${p.firstName}</b></td><td>${p.birthDate}</td><td>${p.bloodGroup} ${p.rhesus}</td><td>${p.contacts?.[0]?.phone || '-'}</td>`;
     tbody.appendChild(tr);
   });
 }
 
 async function loadPatientsList() {
   const patients = await window.LifeIDDB.getPatients(isAdminMode);
-  document.getElementById('patientsListTitle').textContent = isAdminMode ? "Bemorlar ro'yxati [ADMIN: Barcha bemorlar]" : "Bemorlar ro'yxati [Faqat sizning ma'lumotlaringiz]";
-
   const tbody = document.getElementById('fullPatientsTableBody');
   tbody.innerHTML = '';
   patients.forEach(p => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${p.lastName} ${p.firstName} ${p.middleName || ''}</b></td><td style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</td><td>${p.birthDate}</td><td>${p.bloodGroup} ${p.rhesus}</td><td>${p.contacts?.[0]?.phone || '-'}</td><td style="font-family:'DM Mono';font-size:11px;color:var(--text-3);">${p.createdBy || '-'}</td><td><button class="add-btn" onclick="alert('Bemor: ${p.lastName} ${p.firstName}\\nKasallik: ${p.chronic}\\nAllergiya: ${p.allergies?.join(', ')}')">Ko'rish</button></td>`;
+    tr.innerHTML = `<td><b>${p.lastName} ${p.firstName} ${p.middleName || ''}</b></td><td style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</td><td>${p.birthDate}</td><td>${p.bloodGroup} ${p.rhesus}</td><td>${p.contacts?.[0]?.phone || '-'}</td><td><button class="add-btn" onclick="alert('Bemor: ${p.lastName} ${p.firstName}\\nKasallik: ${p.chronic}\\nAllergiya: ${p.allergies?.join(', ')}')">Ko'rish</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -725,7 +799,7 @@ async function loadDonorsList() {
   tbody.innerHTML = '';
   donors.forEach(d => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${d.lastName} ${d.firstName}</b></td><td>${d.bloodGroup}</td><td>${d.rhesus}</td><td>${d.contacts?.[0]?.phone || '-'}</td><td>${d.address}</td><td style="font-family:'DM Mono';font-size:11px;color:var(--text-3);">${d.createdBy || '-'}</td>`;
+    tr.innerHTML = `<td><b>${d.lastName} ${d.firstName}</b></td><td>${d.bloodGroup}</td><td>${d.rhesus}</td><td>${d.contacts?.[0]?.phone || '-'}</td><td>${d.address}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -736,7 +810,7 @@ async function loadHistoryList() {
   tbody.innerHTML = '';
   history.forEach(h => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${h.action}</b></td><td>${h.details}</td><td style="font-family:'DM Mono';font-size:11px;color:var(--text-3);">${h.userId || '-'}</td><td style="font-size:12px;color:var(--text-3);">${new Date(h.timestamp).toLocaleString()}</td>`;
+    tr.innerHTML = `<td><b>${h.action}</b></td><td>${h.details}</td><td style="font-size:12px;color:var(--text-3);">${new Date(h.timestamp).toLocaleString()}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -817,7 +891,7 @@ async function savePatient() {
     citizenship: document.getElementById('pCitizenship').value,
     passportSeries: document.getElementById('pPassportSeries').value,
     passportNumber: document.getElementById('pPassportNumber').value,
-    jshshir: document.getElementById('pJshshir').value,
+    jshshir: document.getElementById('pJshshir'.value),
     address: document.getElementById('pAddress').value,
     bloodGroup: selectedBloodGroup,
     rhesus: selectedRhesus,
@@ -862,7 +936,6 @@ async function sendGeminiMessage() {
   chatBody.scrollTop = chatBody.scrollHeight;
 
   const botMsg = document.createElement('div');
-  botMsg.className = 'node msg bot';
   botMsg.className = 'msg bot';
   botMsg.textContent = 'Gemini tahlil qilmoqda...';
   chatBody.appendChild(botMsg);
