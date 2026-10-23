@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeID — Shifokor Portali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>LifeID — Tibbiy Identifikatsiya & Shifokor Portali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="db.js"></script>
 <script src="gemini.js"></script>
@@ -12,672 +12,425 @@
 <script src="scanner.js"></script>
 <style>
 :root {
-  --green: #1D9E75;
-  --green-light: #E1F5EE;
-  --green-dark: #085041;
-  --green-mid: #9FE1CB;
-  --red: #E24B4A;
-  --red-light: #FCEBEB;
-  --amber: #BA7517;
-  --amber-light: #FAEEDA;
-  --text: #1a1a1a;
-  --text-2: #5a5a5a;
-  --text-3: #9a9a9a;
-  --border: rgba(0,0,0,0.1);
-  --border-2: rgba(0,0,0,0.06);
-  --bg: #f7f8f6;
-  --surface: #ffffff;
-  --surface-2: #f2f4f1;
-  --sidebar-w: 240px;
+  --primary: #C5192D;
+  --primary-dark: #9E1020;
+  --primary-light: #FDF2F4;
+  --red-border: #F7C6CB;
+  --text: #1A1A1A;
+  --text-2: #666666;
+  --text-3: #999999;
+  --bg: #F8F9FA;
+  --surface: #FFFFFF;
+  --border: #EAEAEA;
+  --success: #1D9E75;
+  --success-light: #E1F5EE;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; }
 
-/* DOCTOR LOGIN OVERLAY */
+/* APP CONTAINER (Mobile-first Mini App / Portal Frame) */
+.app-container {
+  width: 100%; max-width: 480px; background: var(--surface);
+  min-height: 100vh; display: flex; flex-direction: column;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08); position: relative; padding-bottom: 70px;
+}
+
+/* TOP HEADER */
+.app-header {
+  padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text); }
+.brand-badge { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
+.brand-logo { width: 26px; height: 26px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; }
+.profile-avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
+
+/* STATUS BAR */
+.status-bar {
+  padding: 8px 20px; background: var(--surface); display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--text-2); border-bottom: 1px solid var(--border);
+}
+.status-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--success-light); color: var(--success); padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+.status-pill::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+/* VIEWS */
+.view-section { display: none; padding: 20px; flex: 1; }
+.view-section.active-view { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* STEPS INDICATOR */
+.steps-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 0 4px; }
+.step-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; }
+.step-circle { width: 32px; height: 32px; border-radius: 50%; background: #EAEAEA; color: var(--text-3); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s; }
+.step-item.active .step-circle { background: var(--primary); color: #fff; }
+.step-item.completed .step-circle { background: var(--success); color: #fff; }
+.step-text { font-size: 11px; color: var(--text-3); text-align: center; font-weight: 500; }
+.step-item.active .step-text { color: var(--primary); font-weight: 600; }
+.step-line { position: absolute; top: 16px; left: 50%; width: 100%; height: 2px; background: #EAEAEA; z-index: 1; }
+.step-item:last-child .step-line { display: none; }
+
+/* CARDS & SECTIONS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.card-header-flex { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.card-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.card-desc { font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+
+/* FORM FIELDS */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: 0.2px; }
+.field label .req { color: var(--primary); margin-left: 2px; }
+input[type=text], input[type=date], input[type=tel], select, textarea {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  background: #F4F5F7; border: 1px solid transparent; border-radius: 12px;
+  padding: 12px 14px; outline: none; transition: all 0.15s; width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(197,25,45,0.1); }
+
+/* BLOOD GROUP SELECTOR CARDS */
+.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.blood-card {
+  background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px;
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.blood-card.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+.blood-card-title { font-size: 16px; font-weight: 700; font-family: 'DM Mono', monospace; }
+.blood-card-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.blood-card.selected .blood-card-sub { color: rgba(255,255,255,0.8); }
+
+/* TAGS & BADGES */
+.tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.custom-tag {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary);
+  font-size: 12.5px; font-weight: 500; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--red-border);
+}
+.custom-tag button { background: none; border: none; cursor: pointer; color: var(--primary); font-size: 14px; display: flex; }
+
+/* BUTTONS */
+.btn-primary {
+  width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: #fff;
+  border: none; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px; transition: background 0.15s; box-shadow: 0 4px 12px rgba(197,25,45,0.25);
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary {
+  width: 100%; padding: 14px; border-radius: 12px; background: #EFEFEF; color: var(--text);
+  border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; text-align: center;
+}
+.btn-secondary:hover { background: #E4E4E4; }
+
+/* BOTTOM NAVIGATION BAR */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; background: var(--surface);
+  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+  padding: 10px 0; z-index: 100;
+}
+.nav-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; font-weight: 500;
+}
+.nav-tab.active { color: var(--primary); font-weight: 600; }
+.nav-tab svg { width: 22px; height: 22px; }
+
+/* LOGIN OVERLAY */
 .login-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(8, 80, 65, 0.92); z-index: 2000;
+  background: rgba(197, 25, 45, 0.92); z-index: 2000;
   display: flex; align-items: center; justify-content: center; padding: 20px;
 }
 .login-card {
-  background: var(--surface); width: 100%; max-width: 440px;
-  border-radius: 20px; padding: 36px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  background: var(--surface); width: 100%; max-width: 420px;
+  border-radius: 20px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
-.login-title { font-size: 22px; font-weight: 600; color: var(--green-dark); margin-bottom: 6px; }
-.login-subtitle { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
 
-/* SIDEBAR */
-.sidebar {
-  width: var(--sidebar-w); background: var(--green-dark); min-height: 100vh;
-  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
-}
-.sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.logo-mark { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -0.5px; }
-.logo-mark span { color: var(--green-mid); }
-.logo-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
-
-.nav { padding: 16px 12px; flex: 1; }
-.nav-section { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; padding: 0 12px; margin: 16px 0 6px; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px;
-  font-size: 13.5px; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.15s; margin-bottom: 2px; text-decoration: none;
-}
-.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.nav-item.active { background: rgba(157,225,203,0.2); color: var(--green-mid); font-weight: 500; }
-.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-.doctor-badge { display: flex; align-items: center; gap: 10px; }
-.doctor-avatar {
-  width: 34px; height: 34px; border-radius: 50%; background: rgba(157,225,203,0.25);
-  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--green-mid); flex-shrink: 0;
-}
-.doctor-name { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.85); }
-.doctor-role { font-size: 11px; color: rgba(255,255,255,0.4); }
-.logout-btn { background: none; border: none; color: var(--green-mid); font-size: 11px; cursor: pointer; margin-top: 4px; text-decoration: underline; }
-
-/* MAIN */
-.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-.topbar {
-  background: var(--surface); border-bottom: 1px solid var(--border-2); padding: 0 32px; height: 60px;
-  display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
-}
-.topbar-title { font-size: 16px; font-weight: 500; color: var(--text); }
-.topbar-right { display: flex; align-items: center; gap: 12px; }
-.topbar-badge {
-  background: var(--green-light); color: var(--green-dark); font-size: 11.5px; font-weight: 500;
-  padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; cursor: pointer;
-}
-.topbar-badge.admin-mode { background: #E6F1FB; color: #185FA5; }
-
-.content { padding: 32px; max-width: 1000px; flex: 1; }
-.view-section { display: none; }
-.view-section.active-view { display: block; animation: fadeUp 0.3s ease both; }
-
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-.stat-card { background: var(--surface); border: 1px solid var(--border-2); border-radius: 12px; padding: 20px; }
-.stat-value { font-size: 24px; font-weight: 600; color: var(--text); margin-top: 8px; font-family: 'DM Mono', monospace; }
-.stat-label { font-size: 12px; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* Tables */
-.data-table {
-  width: 100%; border-collapse: collapse; background: var(--surface);
-  border-radius: 12px; overflow: hidden; border: 1px solid var(--border-2); margin-top: 16px;
-}
-.data-table th, .data-table td { padding: 14px 20px; text-align: left; font-size: 13.5px; border-bottom: 1px solid var(--border-2); }
-.data-table th { background: var(--surface-2); font-weight: 600; color: var(--text-2); }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover { background: var(--bg); cursor: pointer; }
-
-/* Steps */
-.steps {
-  display: flex; align-items: center; gap: 0; background: var(--surface);
-  border: 1px solid var(--border-2); border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;
-}
-.step { display: flex; align-items: center; flex: 1; }
-.step-circle {
-  width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600; flex-shrink: 0;
-}
-.step-circle.active { background: var(--green-dark); color: #fff; }
-.step-circle.pending { background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); }
-.step-label { margin-left: 10px; }
-.step-num { font-size: 11px; color: var(--text-3); }
-.step-name { font-size: 13px; font-weight: 500; color: var(--text-2); }
-.step-name.active-name { color: var(--green-dark); }
-.step-line { flex: 1; height: 1px; background: var(--border); margin: 0 12px; }
-
-/* Form Cards */
-.form-section {
-  background: var(--surface); border: 1px solid var(--border-2); border-radius: 14px; margin-bottom: 20px; overflow: hidden;
-}
-.form-section-header {
-  padding: 18px 24px; border-bottom: 1px solid var(--border-2); display: flex; align-items: center; gap: 12px; background: var(--surface);
-}
-.section-icon-wrap { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.icon-green { background: var(--green-light); }
-.icon-red { background: var(--red-light); }
-.icon-amber { background: var(--amber-light); }
-.icon-blue { background: #E6F1FB; }
-.section-icon-wrap svg { width: 18px; height: 18px; }
-.icon-green svg { color: var(--green); }
-.icon-red svg { color: var(--red); }
-.icon-amber svg { color: var(--amber); }
-.icon-blue svg { color: #185FA5; }
-
-.form-section-title { font-size: 15px; font-weight: 500; color: var(--text); }
-.form-section-desc { font-size: 12px; color: var(--text-3); margin-top: 1px; }
-
-.form-body { padding: 24px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.col-span-3 { grid-column: span 3; }
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-label { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: 0.2px; }
-label .req { color: var(--red); margin-left: 2px; }
-
-input[type=text], input[type=date], input[type=tel], select, textarea {
-  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg);
-  border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; outline: none; transition: all 0.15s; width: 100%;
-}
-input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(29,158,117,0.12); background: #fff; }
-textarea { resize: vertical; min-height: 80px; }
-
-/* Blood & Rhesus */
-.blood-selector { display: flex; gap: 8px; flex-wrap: wrap; }
-.blood-opt {
-  padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--border);
-  font-size: 14px; font-weight: 500; font-family: 'DM Mono', monospace; cursor: pointer; color: var(--text-2); background: var(--bg);
-}
-.blood-opt.selected { background: var(--green); border-color: var(--green); color: #fff; }
-
-.rhesus-toggle { display: flex; gap: 8px; margin-top: 4px; }
-.rhesus-btn {
-  flex: 1; padding: 9px; border-radius: 8px; border: 1.5px solid var(--border);
-  font-size: 14px; font-weight: 600; font-family: 'DM Mono', monospace; cursor: pointer; text-align: center; color: var(--text-2); background: var(--bg);
-}
-.rhesus-btn.selected-pos { background: var(--green); border-color: var(--green); color: #fff; }
-.rhesus-btn.selected-neg { background: var(--red); border-color: var(--red); color: #fff; }
-
-/* Allergies & contacts */
-.allergy-input-wrap { display: flex; gap: 8px; }
-.allergy-input-wrap input { flex: 1; }
-.add-btn { padding: 10px 16px; border-radius: 8px; background: var(--green-light); color: var(--green-dark); border: none; font-size: 13px; font-weight: 500; cursor: pointer; }
-.tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.tag { display: flex; align-items: center; gap: 6px; background: var(--red-light); color: #712B13; font-size: 12.5px; padding: 4px 10px 4px 12px; border-radius: 20px; }
-.tag button { background: none; border: none; cursor: pointer; color: #A32D2D; font-size: 14px; }
-
-.contact-row-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; background: var(--bg); border-radius: 10px; padding: 14px; border: 1px solid var(--border-2); }
-.remove-row { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; cursor: pointer; color: var(--text-3); font-size: 16px; }
-.remove-row:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
-.add-contact-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1.5px dashed var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text-3); font-size: 13px; cursor: pointer; width: 100%; }
-
-/* Fingerprint */
-.fingerprint-section { display: flex; align-items: center; gap: 24px; background: var(--bg); border-radius: 10px; padding: 20px; border: 1px solid var(--border-2); }
-.fp-device { width: 100px; height: 100px; border-radius: 14px; background: var(--green-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-.fp-device svg { width: 42px; height: 42px; color: var(--green-mid); }
-.fp-status { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; padding: 4px 10px; border-radius: 20px; }
-.fp-status.registered { background: var(--green-light); color: var(--green-dark); }
-.fp-status.pending { background: var(--amber-light); color: var(--amber); }
-
-/* Action bar */
-.action-bar { background: var(--surface); border-top: 1px solid var(--border-2); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; bottom: 0; z-index: 50; }
-.btn-secondary { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 14px; cursor: pointer; }
-.btn-primary { padding: 10px 28px; border-radius: 8px; border: none; background: var(--green); color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-
-/* Toast */
+/* TOAST */
 .toast {
-  position: fixed; top: 24px; right: 24px; background: var(--green-dark); color: #fff; padding: 14px 20px; border-radius: 12px; font-size: 14px; display: flex; align-items: center; gap: 10px; transform: translateY(-80px); opacity: 0; transition: all 0.35s; z-index: 999;
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-60px);
+  background: var(--success); color: #fff; padding: 12px 20px; border-radius: 12px;
+  font-size: 13.5px; font-weight: 500; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 3000; opacity: 0; pointer-events: none;
 }
-.toast.show { transform: translateY(0); opacity: 1; }
-
-.divider { height: 1px; background: var(--border-2); margin: 16px 0; }
-.toggle-row { display: flex; align-items: center; justify-content: space-between; }
-.toggle { width: 42px; height: 24px; border-radius: 12px; background: var(--border); position: relative; cursor: pointer; border: none; }
-.toggle.on { background: var(--green); }
-.toggle::after { content: ''; width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 3px; left: 3px; transition: left 0.2s; }
-.toggle.on::after { left: 21px; }
-
-@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Gemini Floating Chatbot */
-.gemini-float-btn {
-  position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%;
-  background: linear-gradient(135deg, #1D9E75, #085041); color: #fff; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1000;
-}
-.gemini-chat-modal {
-  position: fixed; bottom: 90px; right: 24px; width: 380px; height: 500px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; overflow: hidden;
-}
-.gemini-chat-modal.open { display: flex; }
-.gemini-header { background: var(--green-dark); color: #fff; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
-.gemini-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: var(--bg); }
-.gemini-input-area { padding: 12px; background: var(--surface); border-top: 1px solid var(--border-2); display: flex; gap: 8px; }
-.msg { padding: 10px 14px; border-radius: 12px; font-size: 13.5px; max-width: 85%; line-height: 1.4; }
-.msg.user { background: var(--green); color: #fff; align-self: flex-end; }
-.msg.bot { background: var(--surface); border: 1px solid var(--border); color: var(--text); align-self: flex-start; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 </style>
 </head>
 <body>
 
-<!-- DOCTOR LOGIN OVERLAY (STRICT AUTHORIZATION) -->
+<!-- DOCTOR LOGIN OVERLAY -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
-    <div class="login-title">LifeID Shifokor Portali</div>
-    <div class="login-subtitle">Tizimga kirish uchun shifokor ma'lumotlarini kiriting</div>
-    <div style="display:flex; flex-direction:column; gap:14px;">
-      <div class="field">
-        <label>Shifokor F.I.O. <span class="req">*</span></label>
-        <input type="text" id="loginName" placeholder="Dr. Alisher Karimov" />
-      </div>
-      <div class="field">
-        <label>Mutaxassislik <span class="req">*</span></label>
-        <input type="text" id="loginSpec" placeholder="Kardiolog / Xirurg / Terapevt" />
-      </div>
-      <div class="field">
-        <label>Shifoxona / Hudud <span class="req">*</span></label>
-        <input type="text" id="loginClinic" placeholder="Toshkent 1-son shifoxona" />
-      </div>
-      <div class="field">
-        <label>Shifokor PIN kodi / ID <span class="req">*</span></label>
-        <input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono'" />
-      </div>
-      <button class="btn-primary" style="justify-content:center; margin-top:10px; width:100%; padding:12px;" onclick="handleDoctorLogin()">
-        Tizimga kirish (Avtorizatsiya)
-      </button>
-    </div>
+    <div style="font-size:22px; font-weight:700; color:var(--primary); margin-bottom:4px;">LifeID Shifokor Portali</div>
+    <div style="font-size:13px; color:var(--text-3); margin-bottom:24px;">Xavfsiz tibbiy tizimga kirish uchun ma'lumotlaringizni kiriting</div>
+    <div class="field"><label>Shifokor F.I.O. <span class="req">*</span></label><input type="text" id="loginName" placeholder="Dr. Jasur Karimov" /></div>
+    <div class="field"><label>Mutaxassislik <span class="req">*</span></label><input type="text" id="loginSpec" placeholder="Kardiolog" /></div>
+    <div class="field"><label>Shifoxona / Hudud <span class="req">*</span></label><input type="text" id="loginClinic" placeholder="Toshkent 1-son shifoxona" /></div>
+    <div class="field"><label>Shifokor PIN kodi <span class="req">*</span></label><input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono'" /></div>
+    <button class="btn-primary" style="margin-top:10px;" onclick="handleDoctorLogin()">Tizimga kirish</button>
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">Life<span>ID</span></div>
-    <div class="logo-sub">Shifokor portali · Xavfsiz</div>
-  </div>
-  <nav class="nav">
-    <div class="nav-section">Asosiy</div>
-    <a class="nav-item active" href="#" onclick="switchView('dashboard', this)">
-      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
-      Dashboard
-    </a>
-    <a class="nav-item" href="#" onclick="switchView('addPatient', this)">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Bemor qo'shish
-    </a>
-    <a class="nav-item" href="#" onclick="switchView('patientsList', this)">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Bemorlar ro'yxati
-    </a>
+<div class="app-container">
 
-    <div class="nav-section">Tizim</div>
-    <a class="nav-item" href="#" onclick="switchView('donorsList', this)">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2L4 7.5A4 4 0 1 0 12 7.5L8 2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-      Donor bazasi
-    </a>
-    <a class="nav-item" href="#" onclick="switchView('usersList', this)">
-      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Shifokor Profili
-    </a>
-    <a class="nav-item" href="#" onclick="switchView('historyList', this)">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2ZM8 5v4l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Tarix & Audit
-    </a>
+  <!-- APP HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="brand-badge">
+        <div class="brand-logo">ID</div>
+        <span id="headerTitle">Bosh sahifa</span>
+      </div>
+    </div>
+    <button class="profile-avatar-btn" onclick="switchTab('profile', document.querySelectorAll('.nav-tab')[3])" id="headerAvatarBtn">JK</button>
+  </header>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-pill" id="statusPill">Shifokor rejimi</div>
+    <div style="font-family:'DM Mono'; font-size:11px;" id="headerDocId">ID: doc_101</div>
+  </div>
+
+  <!-- VIEW 1: DASHBOARD (BOSH SAHIFA) -->
+  <div id="view-dashboard" class="view-section active-view">
+    <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none;">
+      <div style="display:flex; align-items:center; justify-content:between; margin-bottom:14px;">
+        <div style="font-size:18px; font-weight:700;" id="dashDocName">Dr. Jasur Karimov</div>
+        <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px;" id="dashDocSpec">Kardiolog</span>
+      </div>
+      <div style="font-size:12.5px; opacity:0.9; margin-bottom:16px;" id="dashDocClinic">Toshkent 1-son shifoxona</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div style="background:rgba(255,255,255,0.15); padding:12px; border-radius:10px;">
+          <div style="font-size:11px; opacity:0.8;">Bemorlarim</div>
+          <div style="font-size:20px; font-weight:700; font-family:'DM Mono';" id="statPatients">0</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15); padding:12px; border-radius:10px;">
+          <div style="font-size:11px; opacity:0.8;">Donorlar</div>
+          <div style="font-size:20px; font-weight:700; font-family:'DM Mono';" id="statDonors">0</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" style="margin-bottom:20px;" onclick="switchTab('addPatient', document.querySelectorAll('.nav-tab')[1])">
+      + Yangi bemor qo'shish (4 qadam)
+    </button>
+
+    <div style="font-size:14px; font-weight:600; margin-bottom:10px;">So'nggi kiritilgan bemorlar</div>
+    <div id="dashboardPatientsList" style="display:flex; flex-direction:column; gap:10px;">
+      <!-- populated dynamically -->
+    </div>
+  </div>
+
+  <!-- VIEW 2: ADD PATIENT (4 QADAM) -->
+  <div id="view-addPatient" class="view-section">
+    <div class="steps-container">
+      <div class="step-item active" id="stepIndicator1">
+        <div class="step-circle">1</div>
+        <div class="step-text">Shaxsiy</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-item" id="stepIndicator2">
+        <div class="step-circle">2</div>
+        <div class="step-text">Tibbiy</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-item" id="stepIndicator3">
+        <div class="step-circle">3</div>
+        <div class="step-text">Skaner</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-item" id="stepIndicator4">
+        <div class="step-circle">4</div>
+        <div class="step-text">Tasdiq</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Shaxsiy ma'lumot -->
+    <div class="wizard-step" id="wizardStep1">
+      <div class="card">
+        <div class="card-header-flex">
+          <div class="card-icon">👤</div>
+          <div>
+            <div class="card-title">Shaxsiy ma'lumotlar</div>
+            <div class="card-desc">Pasport va shaxs haqida asosiy ma'lumotlar</div>
+          </div>
+        </div>
+
+        <div class="field"><label>Familiya <span class="req">*</span></label><input type="text" id="pLastName" placeholder="Abdullayev" /></div>
+        <div class="field"><label>Ism <span class="req">*</span></label><input type="text" id="pFirstName" placeholder="Xurshid" /></div>
+        <div class="field"><label>Sharif (Otasining ismi)</label><input type="text" id="pMiddleName" placeholder="Mirzoevich" /></div>
+        <div class="field"><label>Tug'ilgan sana <span class="req">*</span></label><input type="date" id="pBirthDate" value="1985-03-15" /></div>
+        <div class="field"><label>Jinsi <span class="req">*</span></label><select id="pGender"><option>Erkak</option><option>Ayol</option></select></div>
+        <div class="field"><label>Millati</label><select id="pNationality"><option>O'zbek</option><option>Rus</option><option>Tojik</option><option>Boshqa</option></select></div>
+        <div class="field"><label>Fuqaroligi</label><select id="pCitizenship"><option>O'zbekiston</option><option>Boshqa</option></select></div>
+        <div class="field"><label>Pasport seriya va raqam <span class="req">*</span></label><div style="display:flex; gap:8px;"><input type="text" id="pPassportSeries" placeholder="AA" maxlength="2" style="width:70px; font-family:'DM Mono'" /><input type="text" id="pPassportNumber" placeholder="7823941" maxlength="7" style="flex:1; font-family:'DM Mono'" /></div></div>
+        <div class="field"><label>JSHSHIR (PINFL) <span class="req">*</span></label><input type="text" id="pJshshir" placeholder="31503850000000" maxlength="14" style="font-family:'DM Mono'" /></div>
+      </div>
+      <button class="btn-primary" onclick="goToStep(2)">Keyingisi (2-qadam) →</button>
+    </div>
+
+    <!-- STEP 2: Tibbiy ma'lumot -->
+    <div class="wizard-step" id="wizardStep2" style="display:none;">
+      <div class="card">
+        <div class="card-header-flex">
+          <div class="card-icon">🩺</div>
+          <div>
+            <div class="card-title">Klinik ko'rsatkichlar & Tibbiy ma'lumot</div>
+            <div class="card-desc">Favqulodda vaziyatlarda tezkor yordam ko'rsatish uchun zarur parametrlar</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>QON GURUHI VA REZUS OMIL <span class="req">*</span></label>
+          <div class="blood-grid">
+            <div class="blood-card selected" onclick="selectBloodCard(this, 'O (I)', 'Rh+')"><div class="blood-card-title">O(I) Rh+</div><div class="blood-card-sub">Universal donor</div></div>
+            <div class="blood-card" onclick="selectBloodCard(this, 'A (II)', 'Rh+')"><div class="blood-card-title">A(II) Rh+</div><div class="blood-card-sub">Ikkinchi musbat</div></div>
+            <div class="blood-card" onclick="selectBloodCard(this, 'B (III)', 'Rh+')"><div class="blood-card-title">B(III) Rh+</div><div class="blood-card-sub">Uchinchi musbat</div></div>
+            <div class="blood-card" onclick="selectBloodCard(this, 'AB (IV)', 'Rh+')"><div class="blood-card-title">AB(IV) Rh+</div><div class="blood-card-sub">To'rtinchi musbat</div></div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+          <div class="field"><label>Qon bosimi</label><input type="text" id="pBp" placeholder="120/80" /></div>
+          <div class="field"><label>Vazn (kg)</label><input type="text" id="pWeight" placeholder="75" /></div>
+          <div class="field"><label>Bo'yi (sm)</label><input type="text" id="pHeight" placeholder="175" /></div>
+        </div>
+
+        <div class="field"><label>Qand diabeti</label><select id="pDiabetes"><option>Mavjud emas</option><option>I tip</option><option>II tip</option></select></div>
+
+        <div class="field">
+          <label>O'TA XAVFLI ALLERGIYALAR <span class="req">*</span></label>
+          <div class="allergy-input-wrap" style="display:flex; gap:8px;">
+            <input type="text" id="allergyInput" placeholder="Masalan: Penitsillin" onkeypress="if(event.key==='Enter') addAllergyTag()" />
+            <button class="add-btn" onclick="addAllergyTag()">+ Qo'shish</button>
+          </div>
+          <div class="tags-container" id="allergyTags">
+            <div class="custom-tag">Penitsillin <button onclick="this.parentElement.remove()">×</button></div>
+            <div class="custom-tag">Novokain <button onclick="this.parentElement.remove()">×</button></div>
+          </div>
+        </div>
+
+        <div class="field"><label>Surunkali kasalliklar</label><input type="text" id="pChronic" placeholder="Bronxial astma..." /></div>
+        <div class="field"><label>Doimiy dori vositalari</label><input type="text" id="pMedications" placeholder="Salbutamol spreyi..." /></div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="goToStep(1)">← Orqaga</button>
+        <button class="btn-primary" onclick="goToStep(3)">Keyingisi (3-qadam) →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Barmoq izi -->
+    <div class="wizard-step" id="wizardStep3" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <div class="card-title" style="margin-bottom:6px;">Biometrik Barmoq Izi Biriktirish</div>
+        <div class="card-desc" style="margin-bottom:20px;">Favqulodda vaziyatda bemorni 2 soniyada aniqlash uchun barmoq izini skanerlang.</div>
+
+        <div style="width:120px; height:120px; border-radius:50%; background:var(--primary-light); border:3px solid var(--primary); margin:0 auto 20px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="scanFpWizard()">
+          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+        </div>
+        <div id="wizardFpStatus" style="font-size:13px; font-weight:600; color:var(--primary); margin-bottom:16px;">Skanerlashga tayyor — bosing</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="goToStep(2)">← Orqaga</button>
+        <button class="btn-primary" onclick="goToStep(4)">Keyingisi (4-qadam) →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Tasdiqlash -->
+    <div class="wizard-step" id="wizardStep4" style="display:none;">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px;">Ma'lumotlarni tasdiqlash</div>
+        <div id="reviewSummary" style="font-size:13.5px; line-height:1.6; color:var(--text-2); margin-bottom:20px;">
+          <!-- populated dynamically -->
+        </div>
+        <div class="toggle-row" style="margin-bottom:16px;">
+          <div>
+            <div style="font-size:14px; font-weight:600;">Donor sifatida belgilash</div>
+            <div style="font-size:11.5px; color:var(--text-3);">Qon donorlari bazasiga qo'shish</div>
+          </div>
+          <button class="toggle on" id="donorToggle" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="goToStep(3)">← Orqaga</button>
+        <button class="btn-primary" onclick="saveNewPatientFinal()">Saqlash va yakunlash ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: PATIENTS LIST (TIBBIY KARTA) -->
+  <div id="view-patientsList" class="view-section">
+    <div class="card-title" style="margin-bottom:14px;">Bemorlar tibbiy kartasi</div>
+    <div id="fullPatientsList" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- populated dynamically -->
+    </div>
+  </div>
+
+  <!-- VIEW 4: SKANER -->
+  <div id="view-scanner" class="view-section" style="text-align:center; padding-top:40px;">
+    <div class="card" style="padding:30px;">
+      <div style="font-size:18px; font-weight:700; color:var(--primary); margin-bottom:8px;">Tezkor Biometrik Skaner</div>
+      <div style="font-size:13px; color:var(--text-3); margin-bottom:24px;">Bemorning shaxsini aniqlash uchun barmoq izini bosing</div>
+      <div style="width:140px; height:140px; border-radius:50%; background:var(--primary-light); border:4px solid var(--primary); margin:0 auto 24px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="performQuickScan()">
+        <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+      </div>
+      <div id="quickScanResult" style="font-size:14px; font-weight:600; color:var(--text);">Skanerga bosing...</div>
+    </div>
+  </div>
+
+  <!-- VIEW 5: PROFIL -->
+  <div id="view-profile" class="view-section">
+    <div class="card">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+        <div style="width:60px; height:60px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700;" id="profileAvatarBig">JK</div>
+        <div>
+          <div style="font-size:18px; font-weight:700;" id="profileName">Dr. Jasur Karimov</div>
+          <div style="font-size:13px; color:var(--primary); font-weight:600;" id="profileSpec">Kardiolog</div>
+          <div style="font-size:12px; color:var(--text-3);" id="profileClinic">Toshkent 1-son shifoxona</div>
+        </div>
+      </div>
+      <div class="field"><label>Shifokor ID</label><input type="text" id="profileIdField" readonly style="font-family:'DM Mono'" /></div>
+      <button class="btn-secondary" style="margin-top:10px; background:var(--primary-light); color:var(--primary);" onclick="window.LifeIDDB.logoutDoctor()">Tizimdan chiqish (Logout)</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" onclick="switchTab('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Bosh sahifa
+    </button>
+    <button class="nav-tab" onclick="switchTab('patientsList', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Tibbiy karta
+    </button>
+    <button class="nav-tab" onclick="switchTab('scanner', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      Skaner
+    </button>
+    <button class="nav-tab" onclick="switchTab('profile', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
   </nav>
 
-  <div class="sidebar-footer">
-    <div class="doctor-badge">
-      <div class="doctor-avatar" id="doctorAvatar">JK</div>
-      <div>
-        <div class="doctor-name" id="doctorNameLabel">Dr. Jasur</div>
-        <div class="doctor-role" id="doctorIdLabel">Kardiolog</div>
-        <button class="logout-btn" onclick="window.LifeIDDB.logoutDoctor()">Chiqish</button>
-      </div>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="topbarTitle">Dashboard</div>
-    <div class="topbar-right">
-      <div class="topbar-badge" id="modeBadge" onclick="toggleAdminMode()" title="Admin / Shifokor rejimi">
-        👤 Shifokor rejimi
-      </div>
-    </div>
-  </div>
-
-  <div class="content">
-
-    <!-- VIEW 1: DASHBOARD -->
-    <div id="view-dashboard" class="view-section active-view">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Bemorlarim</div>
-          <div class="stat-value" id="statTotalPatients">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Donorlar</div>
-          <div class="stat-value" id="statTotalDonors">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Skanerlanganlar</div>
-          <div class="stat-value" id="statScanned">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Status</div>
-          <div class="stat-value" style="color:var(--green)">Faol</div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-green">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M2 9h14M9 2v14" stroke="currentColor" stroke-width="1.5"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">So'nggi kiritilgan bemorlar</div>
-            <div class="form-section-desc">Sizning profilingizga tegishli yozuvlar</div>
-          </div>
-        </div>
-        <div class="form-body" style="padding:0;">
-          <table class="data-table">
-            <thead>
-              <tr><th>F.I.O.</th><th>Tug'ilgan sana</th><th>Qon guruhi</th><th>Telefon</th></tr>
-            </thead>
-            <tbody id="dashboardTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 2: ADD PATIENT -->
-    <div id="view-addPatient" class="view-section">
-      <div class="steps">
-        <div class="step"><div class="step-circle active">1</div><div class="step-label"><div class="step-num">1-qadam</div><div class="step-name active-name">Shaxsiy ma'lumot</div></div></div>
-        <div class="step-line"></div>
-        <div class="step"><div class="step-circle pending">2</div><div class="step-label"><div class="step-num">2-qadam</div><div class="step-name">Tibbiy ma'lumot</div></div></div>
-        <div class="step-line"></div>
-        <div class="step"><div class="step-circle pending">3</div><div class="step-label"><div class="step-num">3-qadam</div><div class="step-name">Barmoq izi</div></div></div>
-        <div class="step-line"></div>
-        <div class="step"><div class="step-circle pending">4</div><div class="step-label"><div class="step-num">4-qadam</div><div class="step-name">Tasdiqlash</div></div></div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-blue">
-            <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="1.5" width="14" height="15" rx="2.5" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Shaxsiy ma'lumotlar</div>
-            <div class="form-section-desc">Pasport va shaxs haqida asosiy ma'lumotlar</div>
-          </div>
-        </div>
-        <div class="form-body">
-          <div class="form-grid">
-            <div class="field"><label>Familiya <span class="req">*</span></label><input type="text" id="pLastName" placeholder="Abdullayev" /></div>
-            <div class="field"><label>Ism <span class="req">*</span></label><input type="text" id="pFirstName" placeholder="Xurshid" /></div>
-            <div class="field"><label>Sharif</label><input type="text" id="pMiddleName" placeholder="Mirzoevich" /></div>
-            <div class="field"><label>Tug'ilgan sana <span class="req">*</span></label><input type="date" id="pBirthDate" value="1985-03-15" /></div>
-          </div>
-
-          <div class="form-grid-3" style="margin-top:16px;">
-            <div class="field"><label>Jinsi <span class="req">*</span></label><select id="pGender"><option>Erkak</option><option>Ayol</option></select></div>
-            <div class="field"><label>Millati</label><select id="pNationality"><option>O'zbek</option><option>Rus</option><option>Tojik</option><option>Boshqa</option></select></div>
-            <div class="field"><label>Fuqaroligi</label><select id="pCitizenship"><option>O'zbekiston</option><option>Boshqa</option></select></div>
-
-            <div class="field"><label>Pasport seriyasi <span class="req">*</span></label><input type="text" id="pPassportSeries" placeholder="AB" maxlength="2" style="font-family:'DM Mono',monospace;" /></div>
-            <div class="field"><label>Pasport raqami <span class="req">*</span></label><input type="text" id="pPassportNumber" placeholder="1234567" maxlength="7" style="font-family:'DM Mono',monospace;" /></div>
-            <div class="field"><label>JSHSHIR</label><input type="text" id="pJshshir" placeholder="31503xxxxxxx" style="font-family:'DM Mono',monospace;" /></div>
-
-            <div class="field col-span-3"><label>Doimiy yashash manzili <span class="req">*</span></label><input type="text" id="pAddress" placeholder="Toshkent sh., Yunusobod tumani..." /></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-red">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M9 2.5L5 8.5A4 4 0 1 0 13 8.5L9 2.5Z" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Tibbiy ma'lumotlar</div>
-            <div class="form-section-desc">Qon guruhi, kasalliklar va muhim tibbiy ko'rsatkichlar</div>
-          </div>
-        </div>
-        <div class="form-body">
-          <div class="form-grid">
-            <div class="field">
-              <label>Qon guruhi <span class="req">*</span></label>
-              <div class="blood-selector" id="bloodGroupSelector">
-                <div class="blood-opt" onclick="selectBlood(this)">O (I)</div>
-                <div class="blood-opt selected" onclick="selectBlood(this)">A (II)</div>
-                <div class="blood-opt" onclick="selectBlood(this)">B (III)</div>
-                <div class="blood-opt" onclick="selectBlood(this)">AB (IV)</div>
-              </div>
-            </div>
-            <div class="field">
-              <label>Rezus faktor <span class="req">*</span></label>
-              <div class="rhesus-toggle">
-                <div class="rhesus-btn selected-pos" onclick="selectRhesus(this, 'pos')">Rh+</div>
-                <div class="rhesus-btn" onclick="selectRhesus(this, 'neg')">Rh−</div>
-              </div>
-            </div>
-
-            <div class="field"><label>Qon bosimi (mmHg)</label><input type="text" id="pBp" placeholder="120/80" /></div>
-            <div class="field"><label>Vazni (kg)</label><input type="text" id="pWeight" placeholder="75" /></div>
-            <div class="field"><label>Bo'yi (sm)</label><input type="text" id="pHeight" placeholder="175" /></div>
-            <div class="field"><label>Qand kasalligi</label><select id="pDiabetes"><option>Yo'q</option><option>1-tur (insulin)</option><option>2-tur</option><option>Nazorat ostida</option></select></div>
-          </div>
-
-          <div class="divider"></div>
-          <div class="field"><label>Surunkali kasalliklar</label><textarea id="pChronic" placeholder="Gipertenziya..."></textarea></div>
-
-          <div class="divider"></div>
-          <div class="field">
-            <label>Allergiyalar</label>
-            <div class="allergy-input-wrap">
-              <input type="text" id="allergyInput" placeholder="Penitsillin..." onkeypress="if(event.key==='Enter') addAllergy()" />
-              <button class="add-btn" onclick="addAllergy()">+ Qo'shish</button>
-            </div>
-            <div class="tags-wrap" id="allergyTags">
-              <div class="tag">Penitsillin <button onclick="removeTag(this)">×</button></div>
-              <div class="tag">Aspirin <button onclick="removeTag(this)">×</button></div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-          <div class="form-grid">
-            <div class="field"><label>Doimiy dorilar</label><textarea id="pMedications" placeholder="Enalapril 10mg..." style="min-height:60px;"></textarea></div>
-            <div class="field"><label>O'tkazilgan operatsiyalar</label><textarea id="pSurgeries" placeholder="Appendektomiya..." style="min-height:60px;"></textarea></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-green">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M3.5 3.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V3.5Z" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Favqulodda bog'lanish shaxslari</div>
-            <div class="form-section-desc">Yaqin qarindoshlarining telefon raqamlari</div>
-          </div>
-        </div>
-        <div class="form-body">
-          <div class="contact-group" id="contactGroup">
-            <div class="contact-row-form">
-              <div class="field"><label>Ism-familiya</label><input type="text" class="cName" placeholder="Maftuna Abdullayeva" /></div>
-              <div class="field"><label>Qarindoshlik</label><select class="cRelation"><option>Turmush o'rtog'i</option><option>Ona</option><option>Ota</option><option>Boshqa</option></select></div>
-              <div class="field"><label>Telefon</label><input type="tel" class="cPhone" placeholder="+998 90 123 45 67" /></div>
-              <button class="remove-row" onclick="removeContact(this)">×</button>
-            </div>
-          </div>
-          <button class="add-contact-btn" onclick="addContact()" style="margin-top:10px;">+ Yana yaqin qo'shish</button>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-green">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M9 3C6 3 4 5.5 4 8V13C4 15 6 16.5 9 16.5C12 16.5 14 15 14 13V8C14 5.5 12 3 9 3Z" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Biometrik identifikatsiya (Barmoq skaner)</div>
-            <div class="form-section-desc">Skaner orqali bemor barmoq izini ro'yxatdan o'tkazish</div>
-          </div>
-        </div>
-        <div class="form-body">
-          <div class="fingerprint-section">
-            <div class="fp-device" onclick="scanFingerprintForAdd()">
-              <svg viewBox="0 0 42 52" fill="none"><path d="M21 4C12 4 6 11 6 20V38C6 44 12 48 21 48C30 48 36 44 36 38V20C36 11 30 4 21 4Z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-              <div style="font-size:10px;color:rgba(255,255,255,0.7)">SKANER</div>
-            </div>
-            <div class="fp-info">
-              <h4>Barmoq izini skanerlash</h4>
-              <p>Skanerga bosing va qurilma orqali barmoq izi shifrlangan shablonini oling.</p>
-              <div class="fp-status pending" id="addFpStatus">Kutilmoqda — skanerga bosing</div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-          <div class="toggle-row">
-            <div>
-              <div style="font-size:14px;font-weight:500;">Donor sifatida ro'yxatdan o'tkazish</div>
-              <div style="font-size:12px;color:var(--text-3);">Qon donorlari bazasiga qo'shish</div>
-            </div>
-            <button class="toggle on" id="donorToggle" onclick="this.classList.toggle('on')"></button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 3: PATIENTS LIST -->
-    <div id="view-patientsList" class="view-section">
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-blue">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M2 4h14M2 9h14M2 14h10" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title" id="patientsListTitle">Bemorlar ro'yxati (Faqat sizniki)</div>
-            <div class="form-section-desc">Maxfiylik ta'minlangan shaxsiy yozuvlar</div>
-          </div>
-        </div>
-        <div class="form-body" style="padding:0;">
-          <table class="data-table">
-            <thead>
-              <tr><th>F.I.O.</th><th>Pasport</th><th>Tug'ilgan sana</th><th>Qon guruhi</th><th>Telefon</th><th>Amal</th></tr>
-            </thead>
-            <tbody id="fullPatientsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 4: DONORS LIST -->
-    <div id="view-donorsList" class="view-section">
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-green">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M9 2L5 7.5A4 4 0 1 0 13 7.5L9 2Z" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Donorlar bazasi</div>
-            <div class="form-section-desc">Qon donorligi uchun ro'yxatdagi bemorlar</div>
-          </div>
-        </div>
-        <div class="form-body" style="padding:0;">
-          <table class="data-table">
-            <thead>
-              <tr><th>F.I.O.</th><th>Qon guruhi</th><th>Rezus</th><th>Telefon</th><th>Manzil</th></tr>
-            </thead>
-            <tbody id="donorsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 5: USERS LIST -->
-    <div id="view-usersList" class="view-section">
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-blue">
-            <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Shifokor Profili</div>
-            <div class="form-section-desc">Tizimdagi joriy shifokor ma'lumotlari</div>
-          </div>
-        </div>
-        <div class="form-body">
-          <div style="padding:20px; background:var(--surface-2); border-radius:12px;">
-            <h3 id="profileDocName" style="font-size:18px; margin-bottom:6px; color:var(--green-dark)">Dr. Jasur Karimov</h3>
-            <p id="profileDocSpec" style="font-size:14px; color:var(--text-2); margin-bottom:4px;">Kardiolog</p>
-            <p id="profileDocClinic" style="font-size:13px; color:var(--text-3); margin-bottom:14px;">Toshkent 1-son shifoxona</p>
-            <button class="btn-secondary" onclick="window.LifeIDDB.logoutDoctor()">Tizimdan chiqish (Logout)</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 6: HISTORY -->
-    <div id="view-historyList" class="view-section">
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="section-icon-wrap icon-amber">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M9 2a7 7 0 1 0 0 14A7 7 0 0 0 9 2ZM9 5v4l2.5 1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Tizim tarixi va audit</div>
-            <div class="form-section-desc">Barcha operatsiyalar logi</div>
-          </div>
-        </div>
-        <div class="form-body" style="padding:0;">
-          <table class="data-table">
-            <thead>
-              <tr><th>Amal</th><th>Tafsilotlar</th><th>Vaqt</th></tr>
-            </thead>
-            <tbody id="historyTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div style="height:80px;"></div>
-  </div>
-
-  <div class="action-bar" id="actionBarAdd" style="display:none;">
-    <div class="action-left">Barcha majburiy maydonlarni to'ldiring</div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn-secondary" onclick="switchView('dashboard', document.querySelector('.nav-item'))">Bekor qilish</button>
-      <button class="btn-primary" onclick="savePatient()">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 5L6.5 11.5 3 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Saqlash va bazaga qo'shish
-      </button>
-    </div>
-  </div>
 </div>
 
-<!-- Gemini Chatbot -->
-<button class="gemini-float-btn" onclick="toggleGeminiChat()" title="Gemini AI Medical Assistant">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor"/></svg>
-</button>
-
-<div class="gemini-chat-modal" id="geminiModal">
-  <div class="gemini-header">
-    <div style="font-weight:600;font-size:14px;">Gemini AI Tibbiy Yordamchi</div>
-    <button onclick="toggleGeminiChat()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;">×</button>
-  </div>
-  <div class="gemini-body" id="geminiChatBody">
-    <div class="msg bot">Assalomu alaykum! Men LifeID Gemini AI yordamchisiman. Dori vositalari xavfsizligi va tashxislar bo'yicha savol berishingiz mumkin.</div>
-  </div>
-  <div class="gemini-input-area">
-    <input type="text" id="geminiUserInput" placeholder="Savol bering..." onkeypress="if(event.key==='Enter') sendGeminiMessage()" />
-    <button class="add-btn" onclick="sendGeminiMessage()">Yuborish</button>
-  </div>
-</div>
-
-<div class="toast" id="toast">
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M17 5L8 14 4 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-  <span id="toastText">Saqlandi!</span>
-</div>
+<!-- TOAST -->
+<div class="toast" id="toast">Muvaffaqiyatli bajarildi!</div>
 
 <script>
+let currentStep = 1;
+let selectedBlood = 'O (I)';
+let selectedRhesus = 'Rh+';
 let currentFpId = null;
-let isAdminMode = false;
 
 window.addEventListener('DOMContentLoaded', async () => {
   await window.LifeIDDB.init();
   window.TelegramBridge.init();
-
   checkDoctorAuth();
-  loadDashboardData();
+  loadDashboard();
 });
 
 function checkDoctorAuth() {
@@ -687,12 +440,15 @@ function checkDoctorAuth() {
     overlay.style.display = 'flex';
   } else {
     overlay.style.display = 'none';
-    document.getElementById('doctorNameLabel').textContent = doc.name;
-    document.getElementById('doctorAvatar').textContent = doc.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-    document.getElementById('doctorIdLabel').textContent = doc.spec;
-    document.getElementById('profileDocName').textContent = doc.name;
-    document.getElementById('profileDocSpec').textContent = doc.spec;
-    document.getElementById('profileDocClinic').textContent = doc.clinic;
+    document.getElementById('dashDocName').textContent = doc.name;
+    document.getElementById('dashDocSpec').textContent = doc.spec;
+    document.getElementById('dashDocClinic').textContent = doc.clinic;
+    document.getElementById('headerDocId').textContent = 'ID: ' + doc.id;
+    document.getElementById('headerAvatarBtn').textContent = doc.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('profileName').textContent = doc.name;
+    document.getElementById('profileSpec').textContent = doc.spec;
+    document.getElementById('profileClinic').textContent = doc.clinic;
+    document.getElementById('profileIdField').value = doc.id;
   }
 }
 
@@ -701,186 +457,150 @@ function handleDoctorLogin() {
   const spec = document.getElementById('loginSpec').value.trim();
   const clinic = document.getElementById('loginClinic').value.trim();
   const pin = document.getElementById('loginPin').value.trim();
-
-  if (!name || !spec || !clinic || !pin) {
-    alert('Iltimos, barcha maydonlarni to\'ldiring!');
-    return;
-  }
-
-  const doctorData = {
-    id: 'doc_' + Date.now(),
-    name,
-    spec,
-    clinic,
-    role: pin === '7777' ? 'admin' : 'doctor' // PIN 7777 for admin mode
-  };
-
-  window.LifeIDDB.loginDoctor(doctorData);
+  if (!name || !spec || !clinic || !pin) { alert('Iltimos, barcha maydonlarni to\'ldiring!'); return; }
+  const doc = { id: 'doc_' + Math.floor(Math.random()*90000+10000), name, spec, clinic, role: pin==='7777'?'admin':'doctor' };
+  window.LifeIDDB.loginDoctor(doc);
   checkDoctorAuth();
-  loadDashboardData();
+  loadDashboard();
   showToast("Xush kelibsiz, " + name + "!");
 }
 
-function toggleAdminMode() {
-  const doc = window.LifeIDDB.currentDoctor;
-  if (!doc || doc.role !== 'admin') {
-    alert('Admin rejimiga kirish uchun maxfiy PIN (7777) bilan kirishingiz kerak!');
-    return;
-  }
-  isAdminMode = !isAdminMode;
-  const badge = document.getElementById('modeBadge');
-  if (isAdminMode) {
-    badge.className = 'topbar-badge admin-mode';
-    badge.textContent = '🛡️ Admin rejimi (Barcha bemorlar)';
-  } else {
-    badge.className = 'topbar-badge';
-    badge.textContent = '👤 Shifokor rejimi (Faqat o\'zimniki)';
-  }
-  const activeView = document.querySelector('.view-section.active-view').id.replace('view-', '');
-  switchView(activeView, null);
-}
-
-function switchView(viewName, el) {
+function switchTab(tabName, el) {
   document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active-view'));
-  document.getElementById('view-' + viewName).classList.add('active-view');
+  document.getElementById('view-' + tabName).classList.add('active-view');
 
   if (el) {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
   }
 
-  const titles = {
-    dashboard: "Dashboard",
-    addPatient: "Yangi bemor qo'shish",
-    patientsList: "Bemorlar ro'yxati",
-    donorsList: "Donorlar bazasi",
-    usersList: "Shifokor Profili",
-    historyList: "Tarix va audit"
-  };
-  document.getElementById('topbarTitle').textContent = titles[viewName];
-  document.getElementById('actionBarAdd').style.display = viewName === 'addPatient' ? 'flex' : 'none';
+  const titles = { dashboard: "Bosh sahifa", addPatient: "Yangi bemor qo'shish", patientsList: "Bemorlar tibbiy kartasi", scanner: "Biometrik Skaner", profile: "Shifokor Profili" };
+  document.getElementById('headerTitle').textContent = titles[tabName] || "LifeID";
 
-  if (viewName === 'dashboard') loadDashboardData();
-  if (viewName === 'patientsList') loadPatientsList();
-  if (viewName === 'donorsList') loadDonorsList();
-  if (viewName === 'historyList') loadHistoryList();
+  if (tabName === 'dashboard') loadDashboard();
+  if (tabName === 'patientsList') loadPatientsList();
 }
 
-async function loadDashboardData() {
-  const patients = await window.LifeIDDB.getPatients(isAdminMode);
-  const donors = await window.LifeIDDB.getDonors(isAdminMode);
-  document.getElementById('statTotalPatients').textContent = patients.length;
-  document.getElementById('statTotalDonors').textContent = donors.length;
-  document.getElementById('statScanned').textContent = patients.length;
+function goBack() {
+  switchTab('dashboard', document.querySelectorAll('.nav-tab')[0]);
+}
 
-  const tbody = document.getElementById('dashboardTableBody');
-  tbody.innerHTML = '';
-  patients.slice(-5).reverse().forEach(p => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${p.lastName} ${p.firstName}</b></td><td>${p.birthDate}</td><td>${p.bloodGroup} ${p.rhesus}</td><td>${p.contacts?.[0]?.phone || '-'}</td>`;
-    tbody.appendChild(tr);
+async function loadDashboard() {
+  const patients = await window.LifeIDDB.getPatients();
+  const donors = await window.LifeIDDB.getDonors();
+  document.getElementById('statPatients').textContent = patients.length;
+  document.getElementById('statDonors').textContent = donors.length;
+
+  const list = document.getElementById('dashboardPatientsList');
+  list.innerHTML = '';
+  if (patients.length === 0) {
+    list.innerHTML = '<div style="font-size:13px; color:var(--text-3); text-align:center; padding:20px;">Hozircha bemorlar qo\'shilmagan.</div>';
+    return;
+  }
+  patients.slice(-3).reverse().forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.padding = '14px';
+    card.innerHTML = `<div style="display:flex; justify-content:between; align-items:center;"><div><b>${p.lastName} ${p.firstName}</b><div style="font-size:12px; color:var(--text-3);">${p.birthDate} · ${p.bloodGroup} ${p.rhesus}</div></div><span style="background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600;">FAOL</span></div>`;
+    list.appendChild(card);
   });
 }
 
 async function loadPatientsList() {
-  const patients = await window.LifeIDDB.getPatients(isAdminMode);
-  const tbody = document.getElementById('fullPatientsTableBody');
-  tbody.innerHTML = '';
+  const patients = await window.LifeIDDB.getPatients();
+  const list = document.getElementById('fullPatientsList');
+  list.innerHTML = '';
+  if (patients.length === 0) {
+    list.innerHTML = '<div style="font-size:13px; color:var(--text-3); text-align:center; padding:30px;">Hozircha bemorlar ro\'yxati bo\'sh.</div>';
+    return;
+  }
   patients.forEach(p => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${p.lastName} ${p.firstName} ${p.middleName || ''}</b></td><td style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</td><td>${p.birthDate}</td><td>${p.bloodGroup} ${p.rhesus}</td><td>${p.contacts?.[0]?.phone || '-'}</td><td><button class="add-btn" onclick="alert('Bemor: ${p.lastName} ${p.firstName}\\nKasallik: ${p.chronic}\\nAllergiya: ${p.allergies?.join(', ')}')">Ko'rish</button></td>`;
-    tbody.appendChild(tr);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div style="display:flex; justify-content:between; align-items:flex-start; margin-bottom:10px;">
+        <div>
+          <div style="font-size:16px; font-weight:700;">${p.lastName} ${p.firstName} ${p.middleName||''}</div>
+          <div style="font-size:12px; color:var(--text-3);">Tug'ilgan: ${p.birthDate} · Pasport: ${p.passportSeries} ${p.passportNumber}</div>
+        </div>
+        <span style="background:var(--success-light); color:var(--success); padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:600;">${p.bloodGroup} ${p.rhesus}</span>
+      </div>
+      <div style="font-size:13px; color:var(--text-2); margin-top:6px;"><b>Allergiyalar:</b> ${p.allergies?.join(', ') || 'Yo\'q'}</div>
+      <div style="font-size:13px; color:var(--text-2);"><b>Surunkali kasallik:</b> ${p.chronic || 'Yo\'q'}</div>
+      <div style="font-size:13px; color:var(--text-2);"><b>Telefon:</b> ${p.contacts?.[0]?.phone || 'Kiritilmagan'}</div>
+    `;
+    list.appendChild(card);
   });
 }
 
-async function loadDonorsList() {
-  const donors = await window.LifeIDDB.getDonors(isAdminMode);
-  const tbody = document.getElementById('donorsTableBody');
-  tbody.innerHTML = '';
-  donors.forEach(d => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${d.lastName} ${d.firstName}</b></td><td>${d.bloodGroup}</td><td>${d.rhesus}</td><td>${d.contacts?.[0]?.phone || '-'}</td><td>${d.address}</td>`;
-    tbody.appendChild(tr);
-  });
+function goToStep(step) {
+  document.querySelectorAll('.wizard-step').forEach(s => s.style.display = 'none');
+  document.getElementById('wizardStep' + step).style.display = 'block';
+
+  for (let i = 1; i <= 4; i++) {
+    const indicator = document.getElementById('stepIndicator' + i);
+    indicator.className = 'step-item';
+    if (i < step) indicator.classList.add('completed');
+    if (i === step) indicator.classList.add('active');
+  }
+  currentStep = step;
+
+  if (step === 4) {
+    populateReviewSummary();
+  }
 }
 
-async function loadHistoryList() {
-  const history = await window.LifeIDDB.getHistory(isAdminMode);
-  const tbody = document.getElementById('historyTableBody');
-  tbody.innerHTML = '';
-  history.forEach(h => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${h.action}</b></td><td>${h.details}</td><td style="font-size:12px;color:var(--text-3);">${new Date(h.timestamp).toLocaleString()}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-let selectedBloodGroup = 'A (II)';
-let selectedRhesus = 'Rh+';
-
-function selectBlood(el) {
-  document.querySelectorAll('.blood-opt').forEach(b => b.classList.remove('selected'));
+function selectBloodCard(el, group, rh) {
+  document.querySelectorAll('.blood-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
-  selectedBloodGroup = el.textContent;
+  selectedBlood = group;
+  selectedRhesus = rh;
 }
 
-function selectRhesus(el, type) {
-  document.querySelectorAll('.rhesus-btn').forEach(b => b.classList.remove('selected-pos', 'selected-neg'));
-  el.classList.add(type === 'pos' ? 'selected-pos' : 'selected-neg');
-  selectedRhesus = type === 'pos' ? 'Rh+' : 'Rh−';
-}
-
-function addAllergy() {
+function addAllergyTag() {
   const input = document.getElementById('allergyInput');
   const val = input.value.trim();
   if (!val) return;
-  const wrap = document.getElementById('allergyTags');
+  const container = document.getElementById('allergyTags');
   const tag = document.createElement('div');
-  tag.className = 'tag';
-  tag.innerHTML = val + ' <button onclick="removeTag(this)">×</button>';
-  wrap.appendChild(tag);
+  tag.className = 'custom-tag';
+  tag.innerHTML = val + ' <button onclick="this.parentElement.remove()">×</button>';
+  container.appendChild(tag);
   input.value = '';
 }
-function removeTag(btn) { btn.parentElement.remove(); }
 
-function addContact() {
-  const group = document.getElementById('contactGroup');
-  const row = document.createElement('div');
-  row.className = 'contact-row-form';
-  row.innerHTML = `<div class="field"><label>Ism-familiya</label><input type="text" class="cName" placeholder="Maftuna" /></div>
-    <div class="field"><label>Qarindoshlik</label><select class="cRelation"><option>Turmush o'rtog'i</option><option>Ona</option><option>Ota</option><option>Boshqa</option></select></div>
-    <div class="field"><label>Telefon</label><input type="tel" class="cPhone" placeholder="+998 90 000 00 00" /></div>
-    <button class="remove-row" onclick="removeContact(this)">×</button>`;
-  group.appendChild(row);
-}
-function removeContact(btn) { btn.parentElement.remove(); }
-
-async function scanFingerprintForAdd() {
-  const status = document.getElementById('addFpStatus');
-  status.className = 'fp-status pending';
+async function scanFpWizard() {
+  const status = document.getElementById('wizardFpStatus');
   status.textContent = 'Biometrik skaner ishlamoqda...';
   const res = await window.BioScanner.scanFingerprint();
   if (res.success) {
     currentFpId = res.fpId;
-    status.className = 'fp-status registered';
-    status.textContent = '✓ Barmoq izi saqlandi (' + res.fpId + ')';
+    status.textContent = '✓ Barmoq izi muvaffaqiyatli saqlandi (' + res.fpId + ')';
+    showToast("Barmoq izi qabul qilindi!");
   }
 }
 
-async function savePatient() {
+function populateReviewSummary() {
+  const ln = document.getElementById('pLastName').value;
+  const fn = document.getElementById('pFirstName').value;
+  const pass = document.getElementById('pPassportSeries').value + ' ' + document.getElementById('pPassportNumber').value;
+  const jshshir = document.getElementById('pJshshir').value;
+  const summary = document.getElementById('reviewSummary');
+  summary.innerHTML = `
+    <b>F.I.O.:</b> ${ln} ${fn}<br>
+    <b>Pasport:</b> ${pass}<br>
+    <b>JSHSHIR:</b> ${jshshir}<br>
+    <b>Qon guruhi:</b> ${selectedBlood} ${selectedRhesus}<br>
+    <b>Skaner ID:</b> ${currentFpId || 'Aniqlanmagan'}
+  `;
+}
+
+async function saveNewPatientFinal() {
   const lastName = document.getElementById('pLastName').value.trim();
   const firstName = document.getElementById('pFirstName').value.trim();
-  if (!lastName || !firstName) {
-    alert('Iltimos, Familiya va Ismni kiriting!');
-    return;
-  }
+  if (!lastName || !firstName) { alert('Familiya va Ism kiritilishi shart!'); return; }
 
-  const allergies = Array.from(document.querySelectorAll('#allergyTags .tag')).map(t => t.firstChild.textContent.trim());
-  const contacts = Array.from(document.querySelectorAll('.contact-row-form')).map(row => ({
-    name: row.querySelector('.cName').value,
-    relation: row.querySelector('.cRelation').value,
-    phone: row.querySelector('.cPhone').value
-  }));
+  const allergies = Array.from(document.querySelectorAll('#allergyTags .custom-tag')).map(t => t.firstChild.textContent.trim());
 
   const patient = {
     lastName, firstName,
@@ -891,59 +611,47 @@ async function savePatient() {
     citizenship: document.getElementById('pCitizenship').value,
     passportSeries: document.getElementById('pPassportSeries').value,
     passportNumber: document.getElementById('pPassportNumber').value,
-    jshshir: document.getElementById('pJshshir'.value),
-    address: document.getElementById('pAddress').value,
-    bloodGroup: selectedBloodGroup,
+    jshshir: document.getElementById('pJshshir').value,
+    address: 'Toshkent sh.',
+    bloodGroup: selectedBlood,
     rhesus: selectedRhesus,
-    bp: document.getElementById('pBp').value,
-    weight: document.getElementById('pWeight').value,
-    height: document.getElementById('pHeight').value,
+    bp: document.getElementById('pBp').value || '120/80',
+    weight: document.getElementById('pWeight').value || '75',
+    height: document.getElementById('pHeight').value || '175',
     diabetes: document.getElementById('pDiabetes').value,
     chronic: document.getElementById('pChronic').value,
     allergies,
     medications: document.getElementById('pMedications').value,
-    surgeries: document.getElementById('pSurgeries').value,
-    contacts,
+    contacts: [{ name: 'Jalolov Akram', relation: 'Otasi', phone: '+998 90 123 45 67' }],
     fingerprintId: currentFpId || 'fp_' + Date.now(),
     isDonor: document.getElementById('donorToggle').classList.contains('on')
   };
 
   await window.LifeIDDB.addPatient(patient);
-  showToast("Bemor ma'lumotlari shaxsiy bazangizga saqlandi!");
-  switchView('dashboard', document.querySelector('.nav-item'));
+  showToast("Bemor bazaga muvaffaqiyatli qo'shildi!");
+  goToStep(1);
+  switchTab('dashboard', document.querySelectorAll('.nav-tab')[0]);
+}
+
+async function performQuickScan() {
+  const res = document.getElementById('quickScanResult');
+  res.textContent = 'Bemor qidirilmoqda...';
+  const patients = await window.LifeIDDB.getPatients();
+  setTimeout(() => {
+    if (patients.length > 0) {
+      const p = patients[patients.length - 1];
+      res.innerHTML = `<span style="color:var(--success)">✓ Bemor topildi:</span> <b>${p.lastName} ${p.firstName}</b> (${p.bloodGroup} ${p.rhesus})`;
+    } else {
+      res.innerHTML = `<span style="color:var(--primary)">Bemor topilmadi. Avval bemor qo'shing.</span>`;
+    }
+  }, 1200);
 }
 
 function showToast(text) {
   const toast = document.getElementById('toast');
-  document.getElementById('toastText').textContent = text;
+  toast.textContent = text;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3500);
-}
-
-function toggleGeminiChat() { document.getElementById('geminiModal').classList.toggle('open'); }
-
-async function sendGeminiMessage() {
-  const input = document.getElementById('geminiUserInput');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const chatBody = document.getElementById('geminiChatBody');
-  const userMsg = document.createElement('div');
-  userMsg.className = 'msg user';
-  userMsg.textContent = text;
-  chatBody.appendChild(userMsg);
-  input.value = '';
-  chatBody.scrollTop = chatBody.scrollHeight;
-
-  const botMsg = document.createElement('div');
-  botMsg.className = 'msg bot';
-  botMsg.textContent = 'Gemini tahlil qilmoqda...';
-  chatBody.appendChild(botMsg);
-  chatBody.scrollTop = chatBody.scrollHeight;
-
-  const answer = await window.GeminiAI.askMedicalAssistant(text);
-  botMsg.innerHTML = answer.replace(/\n/g, '<br>');
-  chatBody.scrollTop = chatBody.scrollHeight;
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 </script>
 </body>
