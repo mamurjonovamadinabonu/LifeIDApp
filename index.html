@@ -6,6 +6,7 @@
 <title>LifeID — Tibbiy Identifikatsiya & Shifokor Portali</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="db.js"></script>
+<script src="apiService.js"></script>
 <script src="gemini.js"></script>
 <script src="scanner.js"></script>
 <style>
@@ -624,7 +625,7 @@ async function saveNewPatientFinal() {
     isDonor: document.getElementById('donorToggle').classList.contains('on')
   };
 
-  await window.LifeIDDB.addPatient(patient);
+  await window.LifeIDApi.registerPatient(patient);
   showToast("Bemor bazaga muvaffaqiyatli qo'shildi!");
   goToStep(1);
   switchTab('dashboard', document.querySelectorAll('.nav-tab')[0]);
@@ -632,16 +633,23 @@ async function saveNewPatientFinal() {
 
 async function performQuickScan() {
   const res = document.getElementById('quickScanResult');
-  res.textContent = 'Bemor qidirilmoqda...';
-  const patients = await window.LifeIDDB.getPatients();
-  setTimeout(() => {
-    if (patients.length > 0) {
-      const p = patients[patients.length - 1];
-      res.innerHTML = `<span style="color:var(--success)">✓ Bemor topildi:</span> <b>${p.lastName} ${p.firstName}</b> (${p.bloodGroup} ${p.rhesus})`;
+  res.textContent = 'Biometrik skaner ishlamoqda...';
+  const scan = await window.BioScanner.scanFingerprint();
+  if (scan.success) {
+    res.textContent = 'Bemor qidirilmoqda...';
+    const patient = await window.LifeIDApi.scanPatientByFingerprint(scan.fpId);
+    if (patient) {
+      res.innerHTML = `<span style="color:var(--success)">✓ Bemor topildi:</span> <b>${patient.lastName} ${patient.firstName}</b> (${patient.bloodGroup} ${patient.rhesus}) - Allergiya: ${patient.allergies?.join(', ')}`;
     } else {
-      res.innerHTML = `<span style="color:var(--primary)">Bemor topilmadi. Avval bemor qo'shing.</span>`;
+      const patients = await window.LifeIDDB.getPatients();
+      if (patients.length > 0) {
+        const p = patients[patients.length - 1];
+        res.innerHTML = `<span style="color:var(--success)">✓ Bemor topildi:</span> <b>${p.lastName} ${p.firstName}</b> (${p.bloodGroup} ${p.rhesus})`;
+      } else {
+        res.innerHTML = `<span style="color:var(--primary)">Bemor topilmadi. Avval bemor qo'shing.</span>`;
+      }
     }
-  }, 1200);
+  }
 }
 
 function showToast(text) {
