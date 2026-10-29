@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeID — Bemor Portali (Telegram Mini App)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root {
+  --primary: #C5192D;
+  --primary-dark: #9E1020;
+  --primary-light: #FDF2F4;
+  --text: #1A1A1A;
+  --text-2: #666666;
+  --text-3: #999999;
+  --bg: #F8F9FA;
+  --surface: #FFFFFF;
+  --border: #EAEAEA;
+  --success: #1D9E75;
+  --success-light: #E1F5EE;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
+.tma-container { width: 100%; max-width: 480px; background: var(--surface); min-height: 100vh; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.06); }
+.tma-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.tma-logo { font-size: 20px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+.tma-logo span { background: var(--primary); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: #fff; border: none; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+input, select { font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 14px; background: #F4F5F7; border: 1px solid transparent; border-radius: 10px; outline: none; width: 100%; }
+input:focus { border-color: var(--primary); background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="tma-container">
+  <header class="tma-header">
+    <div class="tma-logo">LifeID <span>TMA</span></div>
+    <div id="tgUserName" style="font-size:12px; color:var(--text-3);">Bemor Portali</div>
+  </header>
+
+  <!-- TAB 1: PROFILE & EMERGENCY CARD -->
+  <div id="tabProfile" class="tma-tab">
+    <div class="card" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; border:none;">
+      <div style="font-size:12px; opacity:0.8; margin-bottom:4px;">FAVQULODDA TIBBIY KARTA</div>
+      <div style="font-size:22px; font-weight:700; margin-bottom:8px;" id="tmaPatientName">Xurshid Abdullayev</div>
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;" id="tmaBloodGroup">O (I) Rh+</span>
+        <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Faol</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px; font-weight:600; margin-bottom:10px;">Muhim Tibbiy Ma'lumotlar</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>Allergiyalar:</b> <span id="tmaAllergies" style="color:var(--primary);">Penitsillin, Aspirin</span></div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>Surunkali kasallik:</b> <span id="tmaChronic">Bronxial astma</span></div>
+      <div style="font-size:13px; color:var(--text-2);"><b>Favqulodda aloqa (ICE):</b> <span id="tmaContact">+998 90 123 45 67 (Otasi)</span></div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px; font-weight:600; margin-bottom:10px;">⏰ Dori Eslatmasi</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:8px;">Salbutamol spreyi — <b>Har 8 soatda</b></div>
+      <div style="font-size:11px; color:var(--success);">Bildirishnoma yoqilgan (14:00)</div>
+    </div>
+  </div>
+
+  <!-- TAB 2: DONOR SEARCH -->
+  <div id="tabDonor" class="tma-tab" style="display:none;">
+    <div class="card">
+      <div style="font-size:15px; font-weight:600; margin-bottom:12px;">🩸 Qon Donorini Qidirish</div>
+      <div class="field"><label>Qon guruhi</label><select id="searchBlood"><option>O (I) Rh+</option><option>A (II) Rh+</option><option>B (III) Rh+</option><option>AB (IV) Rh+</option></select></div>
+      <div class="field"><label>Hudud / Shahar</label><input type="text" id="searchRegion" value="Toshkent sh." /></div>
+      <button class="btn-primary" onclick="searchDonorsTMA()">Donor topish</button>
+    </div>
+    <div id="donorResults" style="display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+
+  <!-- TMA NAVIGATION -->
+  <nav style="display:flex; justify-content:space-around; margin-top:auto; padding-top:16px; border-top:1px solid var(--border);">
+    <button onclick="switchTmaTab('Profile', this)" style="background:none; border:none; color:var(--primary); font-weight:600; font-size:12px; cursor:pointer;">Mening Karta</button>
+    <button onclick="switchTmaTab('Donor', this)" style="background:none; border:none; color:var(--text-3); font-weight:500; font-size:12px; cursor:pointer;">Donor Qidirish</button>
+  </nav>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      document.getElementById('tgUserName').textContent = '@' + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
+    }
+  }
+});
+
+function switchTmaTab(tab, el) {
+  document.querySelectorAll('.tma-tab').forEach(t => t.style.display = 'none');
+  document.getElementById('tab' + tab).style.display = 'block';
+  document.querySelectorAll('nav button').forEach(b => { b.style.color = 'var(--text-3)'; b.style.fontWeight = '500'; });
+  el.style.color = 'var(--primary)'; el.style.fontWeight = '600';
+}
+
+function searchDonorsTMA() {
+  const bg = document.getElementById('searchBlood').value;
+  const reg = document.getElementById('searchRegion').value;
+  const res = document.getElementById('donorResults');
+  res.innerHTML = `
+    <div class="card" style="padding:14px;">
+      <div style="font-weight:600;">Azizov Sardor</div>
+      <div style="font-size:12px; color:var(--text-3);">${bg} · ${reg}</div>
+      <div style="margin-top:8px;"><a href="tel:+998900000000" style="color:var(--primary); font-weight:600; text-decoration:none;">📞 +998 90 000 00 00</a></div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
