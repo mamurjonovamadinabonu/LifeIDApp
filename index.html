@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeID — Shifokor Portali & Favqulodda Skaner</title>
+<title>LifeID — Shifokor Portali & Shoshilinch Tibbiy Tizim</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="db.js"></script>
 <script src="apiService.js"></script>
@@ -23,6 +23,8 @@
   --border: #EAEAEA;
   --success: #1D9E75;
   --success-light: #E1F5EE;
+  --amber: #BA7517;
+  --amber-light: #FAEEDA;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +33,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* DOCTOR LOGIN OVERLAY */
 .login-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(197, 25, 45, 0.92); z-index: 2000;
+  background: rgba(197, 25, 45, 0.95); z-index: 2000;
   display: flex; align-items: center; justify-content: center; padding: 20px;
 }
 .login-card {
@@ -42,7 +44,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .app-container {
   width: 100%; max-width: 480px; background: var(--surface);
   min-height: 100vh; display: flex; flex-direction: column;
-  box-shadow: 0 0 40px rgba(0,0,0,0.08); position: relative; padding-bottom: 70px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08); position: relative; padding-bottom: 90px;
 }
 
 /* TOP HEADER */
@@ -51,106 +53,82 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   background: var(--surface); border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 50;
 }
-.header-left { display: flex; align-items: center; gap: 12px; }
-.back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text); }
-.brand-badge { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
-.brand-logo { width: 26px; height: 26px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; }
-.profile-avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-
-/* STATUS BAR */
-.status-bar {
-  padding: 8px 20px; background: var(--surface); display: flex; align-items: center; justify-content: space-between;
-  font-size: 12px; color: var(--text-2); border-bottom: 1px solid var(--border);
-}
-.status-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--success-light); color: var(--success); padding: 4px 10px; border-radius: 20px; font-weight: 500; }
-.status-pill::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.brand-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.brand-sub { font-size: 11px; color: var(--text-3); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; background: #F4F5F7; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
+.profile-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; font-weight: 700; font-size: 13px; }
 
 /* VIEWS */
-.view-section { display: none; padding: 20px; flex: 1; }
-.view-section.active-view { display: block; animation: fadeIn 0.25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.view-section { display: none; padding: 16px 20px; flex: 1; }
+.view-section.active-view { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-/* STEPS INDICATOR */
-.steps-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 0 4px; }
-.step-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; }
-.step-circle { width: 32px; height: 32px; border-radius: 50%; background: #EAEAEA; color: var(--text-3); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s; }
-.step-item.active .step-circle { background: var(--primary); color: #fff; }
-.step-item.completed .step-circle { background: var(--success); color: #fff; }
-.step-text { font-size: 11px; color: var(--text-3); text-align: center; font-weight: 500; }
-.step-item.active .step-text { color: var(--primary); font-weight: 600; }
-.step-line { position: absolute; top: 16px; left: 50%; width: 100%; height: 2px; background: #EAEAEA; z-index: 1; }
-.step-item:last-child .step-line { display: none; }
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.card-header-flex { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
 
-/* CARDS & SECTIONS */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-.card-header-flex { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
-.card-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.card-title { font-size: 15px; font-weight: 600; color: var(--text); }
-.card-desc { font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+/* SEARCH BAR & PILLS */
+.search-input-wrap { position: relative; margin-bottom: 12px; }
+.search-input-wrap input { width: 100%; padding: 12px 14px 12px 40px; background: #F4F5F7; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; outline: none; }
+.search-input-wrap input:focus { border-color: var(--primary); background: #fff; }
+.search-input-wrap svg { position: absolute; left: 14px; top: 14px; width: 18px; height: 18px; color: var(--text-3); }
 
-/* FORM FIELDS */
-.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.field label { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: 0.2px; }
-.field label .req { color: var(--primary); margin-left: 2px; }
-input[type=text], input[type=date], input[type=tel], select, textarea {
-  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
-  background: #F4F5F7; border: 1px solid transparent; border-radius: 12px;
-  padding: 12px 14px; outline: none; transition: all 0.15s; width: 100%;
-}
-input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(197,25,45,0.1); }
+.filter-pills { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+.pill { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: #F4F5F7; font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap; color: var(--text-2); }
+.pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-/* BLOOD GROUP SELECTOR CARDS */
-.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.blood-card {
-  background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px;
-  cursor: pointer; transition: all 0.15s; position: relative; text-align: center;
-}
-.blood-card.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
-.blood-card-title { font-size: 16px; font-weight: 700; font-family: 'DM Mono', monospace; }
-
-.rhesus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.rhesus-card {
-  background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px;
-  cursor: pointer; transition: all 0.15s; text-align: center; font-weight: 700; font-family: 'DM Mono', monospace; font-size: 15px;
-}
-.rhesus-card.selected { background: var(--success); border-color: var(--success); color: #fff; }
-
-/* TAGS & BADGES */
-.tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.custom-tag {
-  display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary);
-  font-size: 12.5px; font-weight: 500; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--red-border);
-}
-.custom-tag button { background: none; border: none; cursor: pointer; color: var(--primary); font-size: 14px; display: flex; }
+/* BADGES & TAGS */
+.blood-badge { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; gap: 4px; }
+.alert-badge { background: var(--primary-light); color: var(--primary); border: 1px solid var(--red-border); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
 
 /* BUTTONS */
-.btn-primary {
-  width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: #fff;
-  border: none; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center;
-  justify-content: center; gap: 8px; transition: background 0.15s; box-shadow: 0 4px 12px rgba(197,25,45,0.25);
-}
+.btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: #fff; border: none; font-size: 14.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(197,25,45,0.25); }
 .btn-primary:hover { background: var(--primary-dark); }
-.btn-secondary {
-  width: 100%; padding: 14px; border-radius: 12px; background: #EFEFEF; color: var(--text);
-  border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; text-align: center;
-}
-.btn-secondary:hover { background: #E4E4E4; }
+.btn-secondary { width: 100%; padding: 12px; border-radius: 12px; background: #F4F5F7; color: var(--text); border: none; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
 
 /* BOTTOM NAVIGATION BAR */
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 480px; background: var(--surface);
   border-top: 1px solid var(--border); display: flex; justify-content: space-around;
-  padding: 10px 0; z-index: 100;
+  align-items: center; padding: 8px 0; z-index: 100; height: 75px;
 }
-.nav-tab {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
   background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; font-weight: 500;
+  flex: 1;
 }
-.nav-tab.active { color: var(--primary); font-weight: 600; }
-.nav-tab svg { width: 22px; height: 22px; }
+.nav-item.active { color: var(--primary); font-weight: 600; }
+.nav-item svg { width: 22px; height: 22px; }
 
-/* TOAST */
+/* CENTER FLOATING SCANNER BUTTON */
+.center-scanner-btn {
+  width: 54px; height: 54px; border-radius: 50%; background: var(--primary); color: #fff;
+  border: 4px solid var(--surface); box-shadow: 0 4px 16px rgba(197,25,45,0.4);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  position: relative; top: -14px; transition: transform 0.15s;
+}
+.center-scanner-btn:hover { transform: scale(1.06); }
+.center-scanner-btn svg { width: 26px; height: 26px; }
+
+/* WIZARD & FORMS */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+input[type=text], input[type=date], input[type=tel], select, textarea {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 12px 14px; background: #F4F5F7; border: 1px solid var(--border); border-radius: 12px; outline: none; width: 100%;
+}
+input:focus, select:focus { border-color: var(--primary); background: #fff; }
+
+.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.blood-card { background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; font-weight: 700; font-family: 'DM Mono'; font-size: 15px; }
+.blood-card.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.rhesus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.rhesus-card { background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; font-weight: 700; font-family: 'DM Mono'; font-size: 14px; }
+.rhesus-card.selected { background: var(--success); border-color: var(--success); color: #fff; }
+
 .toast {
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-60px);
   background: var(--success); color: #fff; padding: 12px 20px; border-radius: 12px;
@@ -166,11 +144,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <div style="font-size:22px; font-weight:700; color:var(--primary); margin-bottom:4px;">LifeID Shifokor Portali</div>
-    <div style="font-size:13px; color:var(--text-3); margin-bottom:24px;">Xavfsiz tibbiy tizimga kirish uchun ma'lumotlaringizni kiriting</div>
-    <div class="field"><label>Shifokor F.I.O. <span class="req">*</span></label><input type="text" id="loginName" placeholder="Dr. Jasur Karimov" /></div>
-    <div class="field"><label>Mutaxassislik <span class="req">*</span></label><input type="text" id="loginSpec" placeholder="Kardiolog" /></div>
-    <div class="field"><label>Shifoxona / Hudud <span class="req">*</span></label><input type="text" id="loginClinic" placeholder="Toshkent 1-son shifoxona" /></div>
-    <div class="field"><label>Shifokor PIN kodi <span class="req">*</span></label><input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono'" /></div>
+    <div style="font-size:13px; color:var(--text-3); margin-bottom:24px;">Shoshilinch tibbiy yordam tizimiga kirish</div>
+    <div class="field"><label>Shifokor F.I.O.</label><input type="text" id="loginName" placeholder="Dr. Jasur Karimov" /></div>
+    <div class="field"><label>Mutaxassislik</label><input type="text" id="loginSpec" placeholder="Kardiolog • Reanimatolog" /></div>
+    <div class="field"><label>Shifoxona</label><input type="text" id="loginClinic" placeholder="Toshkent shahar 1-son ShTTYO" /></div>
+    <div class="field"><label>PIN kod</label><input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono'" /></div>
     <button class="btn-primary" style="margin-top:10px;" onclick="handleDoctorLogin()">Tizimga kirish</button>
   </div>
 </div>
@@ -180,50 +158,85 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
   <!-- APP HEADER -->
   <header class="app-header">
     <div class="header-left">
-      <button class="back-btn" onclick="goBack()">←</button>
-      <div class="brand-badge">
-        <div class="brand-logo">ID</div>
-        <span id="headerTitle">Bosh sahifa</span>
+      <div>
+        <div class="brand-title" id="headerTitle">Bosh sahifa</div>
+        <div class="brand-sub">Shifokor rejimi · Shoshilinch tibbiy portal</div>
       </div>
     </div>
-    <button class="profile-avatar-btn" onclick="switchTab('profile', document.querySelectorAll('.nav-tab')[4])" id="headerAvatarBtn">JK</button>
+    <div class="header-right">
+      <button class="icon-btn" title="Bildirishnomalar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <button class="profile-btn" onclick="switchTab('profile', document.querySelectorAll('.nav-item')[4])" id="headerAvatar">JK</button>
+    </div>
   </header>
-
-  <!-- STATUS BAR -->
-  <div class="status-bar">
-    <div class="status-pill" id="statusPill">Shifokor rejimi</div>
-    <div style="font-family:'DM Mono'; font-size:11px;" id="headerDocId">ID: doc_101</div>
-  </div>
 
   <!-- VIEW 1: DASHBOARD (BOSH SAHIFA) -->
   <div id="view-dashboard" class="view-section active-view">
-    <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none;">
-      <div style="display:flex; align-items:center; justify-content:between; margin-bottom:14px;">
+    <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none; padding: 20px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
         <div style="font-size:18px; font-weight:700;" id="dashDocName">Dr. Jasur Karimov</div>
-        <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px;" id="dashDocSpec">Kardiolog</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px;">Navbatchilikda</span>
       </div>
-      <div style="font-size:12.5px; opacity:0.9; margin-bottom:16px;" id="dashDocClinic">Toshkent 1-son shifoxona</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <div style="background:rgba(255,255,255,0.15); padding:12px; border-radius:10px;">
-          <div style="font-size:11px; opacity:0.8;">Bemorlarim</div>
-          <div style="font-size:20px; font-weight:700; font-family:'DM Mono';" id="statPatients">0</div>
+      <div style="font-size:12.5px; opacity:0.9; margin-bottom:16px;" id="dashDocSpecClinic">Kardiolog • Toshkent shahar 1-son ShTTYO</div>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+        <div style="background:rgba(255,255,255,0.15); padding:10px; border-radius:10px; text-align:center;">
+          <div style="font-size:10px; opacity:0.8;">Bemorlar</div>
+          <div style="font-size:16px; font-weight:700; font-family:'DM Mono';" id="statPatients">0</div>
         </div>
-        <div style="background:rgba(255,255,255,0.15); padding:12px; border-radius:10px;">
-          <div style="font-size:11px; opacity:0.8;">Donorlar</div>
-          <div style="font-size:20px; font-weight:700; font-family:'DM Mono';" id="statDonors">0</div>
+        <div style="background:rgba(255,255,255,0.15); padding:10px; border-radius:10px; text-align:center;">
+          <div style="font-size:10px; opacity:0.8;">Donorlar</div>
+          <div style="font-size:16px; font-weight:700; font-family:'DM Mono';" id="statDonors">0</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15); padding:10px; border-radius:10px; text-align:center;">
+          <div style="font-size:10px; opacity:0.8;">Ko'riklar</div>
+          <div style="font-size:16px; font-weight:700; font-family:'DM Mono';">5 bugun</div>
         </div>
       </div>
     </div>
 
-    <button class="btn-primary" style="margin-bottom:20px;" onclick="switchTab('addPatient', document.querySelectorAll('.nav-tab')[1])">
+    <!-- Yangi bemor qo'shish tugmasi -->
+    <button class="btn-primary" style="margin-bottom:16px;" onclick="switchTab('addPatient', null)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
       + Yangi bemor qo'shish (4 qadam)
     </button>
 
-    <div style="font-size:14px; font-weight:600; margin-bottom:10px;">So'nggi kiritilgan bemorlar</div>
+    <!-- Tezkor favqulodda skaner card -->
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; background:var(--primary-light); border-color:var(--red-border);">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; border-radius:10px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px; font-weight:700; color:var(--primary-dark);">Tezkor Favqulodda Skaner</div>
+          <div style="font-size:11.5px; color:var(--text-2);">Hushsiz bemor barmoq izi orqali 2 soniyada aniqlash</div>
+        </div>
+      </div>
+      <button onclick="switchTab('scanner', document.querySelectorAll('.bottom-nav button')[2])" style="background:var(--primary); color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Ochish</button>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div style="font-size:14px; font-weight:700;">So'nggi kiritilgan bemorlar</div>
+      <a href="#" onclick="switchTab('patientsList', document.querySelectorAll('.nav-item')[1]); return false;" style="font-size:12px; color:var(--primary); font-weight:600; text-decoration:none;">Barchasi →</a>
+    </div>
     <div id="dashboardPatientsList" style="display:flex; flex-direction:column; gap:10px;"></div>
   </div>
 
-  <!-- VIEW 2: ADD PATIENT (4 QADAM) -->
+  <!-- VIEW 2: PATIENTS LIST (TIBBIY KARTA) -->
+  <div id="view-patientsList" class="view-section">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="patientSearchInput" placeholder="F.I.O, JSHSHIR yoki Pasport bo'yicha qidirish..." oninput="filterPatientsList()" />
+    </div>
+
+    <div class="filter-pills">
+      <div class="pill active" onclick="setPatientFilter('all', this)">Barchasi</div>
+      <div class="pill" onclick="setPatientFilter('critical', this)">Kritik holatdagi</div>
+      <div class="pill" onclick="setPatientFilter('donor', this)">Qon quyishga tayyor</div>
+    </div>
+
+    <div id="fullPatientsList" style="display:flex; flex-direction:column; gap:12px;"></div>
+  </div>
+
+  <!-- VIEW 3: ADD PATIENT WIZARD (4 QADAM) -->
   <div id="view-addPatient" class="view-section">
     <div class="steps-container">
       <div class="step-item active" id="stepIndicator1"><div class="step-circle">1</div><div class="step-text">Shaxsiy</div><div class="step-line"></div></div>
@@ -255,7 +268,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
       <div class="card">
         <div class="card-header-flex"><div class="card-icon">🩺</div><div><div class="card-title">Klinik ko'rsatkichlar & Qon Tahlili</div><div class="card-desc">Qon guruhi, rezus omil (+/-), infeksiyalar va kasallik tarixi</div></div></div>
 
-        <!-- QON GURUHI -->
         <div class="field">
           <label>QON GURUHI <span class="req">*</span></label>
           <div class="blood-grid">
@@ -266,7 +278,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
           </div>
         </div>
 
-        <!-- REZUS FAKTOR (+ / -) -->
         <div class="field">
           <label>REZUS FAKTOR (+ / -) <span class="req">*</span></label>
           <div class="rhesus-grid">
@@ -296,11 +307,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
           <label>O'TA XAVFLI ALLERGIYALAR <span class="req">*</span></label>
           <div class="allergy-input-wrap" style="display:flex; gap:8px;">
             <input type="text" id="allergyInput" placeholder="Masalan: Penitsillin" onkeypress="if(event.key==='Enter') addAllergyTag()" />
-            <button class="add-btn" onclick="addAllergyTag()">+ Qo'shish</button>
+            <button class="add-btn" onclick="addAllergyTag()" style="padding:10px 14px; background:var(--primary-light); color:var(--primary); border:none; border-radius:8px; font-weight:600; cursor:pointer;">+ Qo'shish</button>
           </div>
           <div class="tags-container" id="allergyTags">
             <div class="custom-tag">Penitsillin <button onclick="this.parentElement.remove()">×</button></div>
-            <div class="custom-tag">Novokain <button onclick="this.parentElement.remove()">×</button></div>
           </div>
         </div>
         <div class="field"><label>Asosiy kasallik tarixi (Anamnez)</label><input type="text" id="pChronic" placeholder="Bronxial astma, Gipertenziya..." /></div>
@@ -333,41 +343,36 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
         <div class="card-title" style="margin-bottom:12px;">Ma'lumotlarni tasdiqlash</div>
         <div id="reviewSummary" style="font-size:13.5px; line-height:1.6; color:var(--text-2); margin-bottom:20px;"></div>
         <div class="field"><label>Oxirgi qon topshirgan sana (Donorlik)</label><input type="date" id="pLastDonation" value="2024-01-15" /></div>
-        <div class="toggle-row" style="margin-bottom:16px;">
+        <div class="toggle-row" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
           <div><div style="font-size:14px; font-weight:600;">Donor sifatida belgilash</div><div style="font-size:11.5px; color:var(--text-3);">Qon donorlari bazasiga qo'shish</div></div>
-          <button class="toggle on" id="donorToggle" onclick="this.classList.toggle('on')"></button>
+          <input type="checkbox" id="donorToggle" checked style="width:20px; height:20px; accent-color:var(--primary);" />
         </div>
       </div>
       <div style="display:flex; gap:10px;"><button class="btn-secondary" onclick="goToStep(3)">← Orqaga</button><button class="btn-primary" onclick="saveNewPatientFinal()">Saqlash va yakunlash ✓</button></div>
     </div>
   </div>
 
-  <!-- VIEW 3: PATIENTS LIST (TIBBIY KARTA) -->
-  <div id="view-patientsList" class="view-section">
-    <div class="card-title" style="margin-bottom:14px;">Bemorlar tibbiy kartasi</div>
-    <div id="fullPatientsList" style="display:flex; flex-direction:column; gap:12px;"></div>
-  </div>
-
   <!-- VIEW 4: DONOR QIDIRISH (Kamida 3 oy oldin topshirganlar + Kasallik tarixi) -->
   <div id="view-donorsSearch" class="view-section">
     <div class="card">
-      <div class="card-title" style="margin-bottom:12px;">🩸 Qon Donorlarini Qidirish</div>
-      <div class="card-desc" style="margin-bottom:14px;">Qon quyish bo'limi uchun: Faqat kamida 3 oy oldin qon topshirgan va kasallik tarixi tekshirilgan donorlar chiqadi.</div>
-      <div class="field"><label>Kerakli qon guruhi</label><select id="doctorSearchBlood"><option>O (I)</option><option>A (II)</option><option>B (III)</option><option>AB (IV)</option></select></div>
+      <div class="card-title" style="margin-bottom:6px;">🩸 Qon Donorlarini Qidirish</div>
+      <div class="card-desc" style="margin-bottom:14px;">Qon quyish bo'limi reglamenti: Faqat kamida 3 oy oldin qon topshirgan, infeksiyalarga tekshirilgan va sog'lom donorlar saralanib ko'rsatiladi.</div>
+      <div class="field"><label>Kerakli qon guruhi va rezus</label><select id="doctorSearchBlood"><option>O (I) Rh+</option><option>O (I) Rh-</option><option>A (II) Rh+</option><option>A (II) Rh-</option><option>B (III) Rh+</option><option>AB (IV) Rh+</option></select></div>
       <button class="btn-primary" onclick="searchDoctorDonors()">Donorlarni topish</button>
     </div>
     <div id="doctorDonorResults" style="display:flex; flex-direction:column; gap:12px;"></div>
   </div>
 
   <!-- VIEW 5: SKANER (FAVQULODDA TEZ TIBBIY YORDAM) -->
-  <div id="view-scanner" class="view-section" style="text-align:center; padding-top:20px;">
-    <div class="card" style="padding:24px;">
-      <div style="font-size:18px; font-weight:700; color:var(--primary); margin-bottom:4px;">🚨 Favqulodda Skaner (Tez Yordam)</div>
-      <div style="font-size:12.5px; color:var(--text-3); margin-bottom:20px;">Hushsiz bemor barmoq izini skanerlaganda barcha hayotiy ma'lumotlar darhol chiqadi.</div>
-      <div style="width:120px; height:120px; border-radius:50%; background:var(--primary-light); border:3px solid var(--primary); margin:0 auto 20px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="performEmergencyScan()">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+  <div id="view-scanner" class="view-section" style="text-align:center; padding-top:10px;">
+    <div class="card" style="padding:20px;">
+      <div style="font-size:18px; font-weight:700; color:var(--primary); margin-bottom:4px;">🚨 Tez Yordam Favqulodda Skaner</div>
+      <div style="font-size:12.5px; color:var(--text-3); margin-bottom:16px;">Hushsiz yoki og'ir bemor barmoq izi orqali qon guruhi va muhim tibbiy kartasini 2 soniyada aniqlash.</div>
+      <div style="width:110px; height:110px; border-radius:50%; background:var(--primary-light); border:3px solid var(--primary); margin:0 auto 16px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="performEmergencyScan()">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
       </div>
-      <div id="quickScanResult" style="text-align:left; margin-top:10px;"></div>
+      <div style="font-size:12px; color:var(--success); font-weight:600; margin-bottom:12px;">● Optik sensor tayyor • Bosib turing</div>
+      <div id="quickScanResult" style="text-align:left;"></div>
     </div>
   </div>
 
@@ -378,8 +383,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
         <div style="width:60px; height:60px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700;" id="profileAvatarBig">JK</div>
         <div>
           <div style="font-size:18px; font-weight:700;" id="profileName">Dr. Jasur Karimov</div>
-          <div style="font-size:13px; color:var(--primary); font-weight:600;" id="profileSpec">Kardiolog</div>
-          <div style="font-size:12px; color:var(--text-3);" id="profileClinic">Toshkent 1-son shifoxona</div>
+          <div style="font-size:13px; color:var(--primary); font-weight:600;" id="profileSpec">Kardiolog • Reanimatolog</div>
+          <div style="font-size:12px; color:var(--text-3);" id="profileClinic">Toshkent shahar 1-son ShTTYO</div>
         </div>
       </div>
       <div class="field"><label>Shifokor ID</label><input type="text" id="profileIdField" readonly style="font-family:'DM Mono'" /></div>
@@ -387,18 +392,35 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR -->
+  <!-- BOTTOM NAVIGATION BAR (MOCKUP DESIGN WITH CENTER FLOATING SCANNER) -->
   <nav class="bottom-nav">
-    <button class="nav-tab active" onclick="switchTab('dashboard', this)">Bosh sahifa</button>
-    <button class="nav-tab" onclick="switchTab('patientsList', this)">Tibbiy karta</button>
-    <button class="nav-tab" onclick="switchTab('donorsSearch', this)">Donorlar</button>
-    <button class="nav-tab" onclick="switchTab('scanner', this)">🚨 Skaner</button>
-    <button class="nav-tab" onclick="switchTab('profile', this)">Profil</button>
+    <button class="nav-item active" onclick="switchTab('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Bosh sahifa
+    </button>
+    <button class="nav-item" onclick="switchTab('patientsList', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Tibbiy karta
+    </button>
+
+    <!-- CENTER FLOATING SCANNER BUTTON -->
+    <button class="center-scanner-btn" onclick="switchTab('scanner', this)" title="Favqulodda Skaner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+
+    <button class="nav-item" onclick="switchTab('donorsSearch', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+      Donorlar
+    </button>
+    <button class="nav-item" onclick="switchTab('profile', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
   </nav>
 
 </div>
 
-<div class="toast" id="toast">Muvaffaqiyatli bajarildi!</div>
+<div class="toast" id="toast" style="z-index:4000;">Muvaffaqiyatli bajarildi!</div>
 
 <script>
 let currentStep = 1;
@@ -420,10 +442,8 @@ function checkDoctorAuth() {
   } else {
     overlay.style.display = 'none';
     document.getElementById('dashDocName').textContent = doc.name;
-    document.getElementById('dashDocSpec').textContent = doc.spec;
-    document.getElementById('dashDocClinic').textContent = doc.clinic;
-    document.getElementById('headerDocId').textContent = 'ID: ' + doc.id;
-    document.getElementById('headerAvatarBtn').textContent = doc.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('dashDocSpecClinic').textContent = doc.spec + ' • ' + doc.clinic;
+    document.getElementById('headerAvatar').textContent = doc.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
     document.getElementById('profileName').textContent = doc.name;
     document.getElementById('profileSpec').textContent = doc.spec;
     document.getElementById('profileClinic').textContent = doc.clinic;
@@ -449,8 +469,10 @@ function switchTab(tabName, el) {
   document.getElementById('view-' + tabName).classList.add('active-view');
 
   if (el) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+    if (!el.classList.contains('center-scanner-btn')) {
+      el.classList.add('active');
+    }
   }
 
   const titles = { dashboard: "Bosh sahifa", addPatient: "Yangi bemor qo'shish", patientsList: "Bemorlar tibbiy kartasi", donorsSearch: "Qon Donorlarini Qidirish", scanner: "Favqulodda Skaner", profile: "Shifokor Profili" };
@@ -461,7 +483,7 @@ function switchTab(tabName, el) {
 }
 
 function goBack() {
-  switchTab('dashboard', document.querySelectorAll('.nav-tab')[0]);
+  switchTab('dashboard', document.querySelectorAll('.nav-item')[0]);
 }
 
 async function loadDashboard() {
@@ -479,18 +501,51 @@ async function loadDashboard() {
   patients.slice(-3).reverse().forEach(p => {
     const card = document.createElement('div');
     card.className = 'card';
-    card.style.padding = '14px';
-    card.innerHTML = `<div style="display:flex; justify-content:between; align-items:center;"><div><b>${p.lastName} ${p.firstName}</b><div style="font-size:12px; color:var(--text-3);">${p.birthDate} · ${p.bloodGroup} ${p.rhesus}</div></div><span style="background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600;">FAOL</span></div>`;
+    card.innerHTML = `
+      <div style="display:flex; justify-content:between; align-items:flex-start; margin-bottom:8px;">
+        <div>
+          <div style="font-size:15px; font-weight:700;">${p.lastName} ${p.firstName}</div>
+          <div style="font-size:11.5px; color:var(--text-3);">Tug'ilgan: ${p.birthDate} · Ish joyi: ${p.workplace || 'Kiritilmagan'}</div>
+        </div>
+        <span class="blood-badge">${p.bloodGroup} ${p.rhesus}</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--primary); margin-bottom:8px;"><b>Allergiya:</b> ${p.allergies?.join(', ') || 'Yo\'q'}</div>
+      <div style="display:flex; justify-content:between; align-items:center;">
+        <span style="font-size:11.5px; color:var(--success); font-weight:600;">● Barqaror nazoratda</span>
+        <button onclick="switchTab('patientsList', document.querySelectorAll('.nav-item')[1])" style="background:var(--primary-light); color:var(--primary); border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Kartani ochish</button>
+      </div>
+    `;
     list.appendChild(card);
   });
 }
 
+let activePatientFilter = 'all';
 async function loadPatientsList() {
   const patients = await window.LifeIDDB.getPatients();
+  renderPatientsList(patients);
+}
+
+function setPatientFilter(filter, el) {
+  activePatientFilter = filter;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  loadPatientsList();
+}
+
+async function filterPatientsList() {
+  const query = document.getElementById('patientSearchInput').value.toLowerCase();
+  const patients = await window.LifeIDDB.getPatients();
+  const filtered = patients.filter(p =>
+    `${p.lastName} ${p.firstName} ${p.passportSeries}${p.passportNumber} ${p.jshshir}`.toLowerCase().includes(query)
+  );
+  renderPatientsList(filtered);
+}
+
+async function renderPatientsList(patients) {
   const list = document.getElementById('fullPatientsList');
   list.innerHTML = '';
   if (patients.length === 0) {
-    list.innerHTML = '<div style="font-size:13px; color:var(--text-3); text-align:center; padding:30px;">Hozircha bemorlar ro\'yxati bo\'sh.</div>';
+    list.innerHTML = '<div style="font-size:13px; color:var(--text-3); text-align:center; padding:30px;">Bemorlar topilmadi.</div>';
     return;
   }
   patients.forEach(p => {
@@ -503,13 +558,18 @@ async function loadPatientsList() {
           <div style="font-size:12px; color:var(--text-3);">Pasport: ${p.passportSeries} ${p.passportNumber} · JSHSHIR: ${p.jshshir}</div>
           <div style="font-size:12px; color:var(--text-2);"><b>Ish joyi:</b> ${p.workplace || 'Kiritilmagan'}</div>
         </div>
-        <span style="background:var(--success-light); color:var(--success); padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:600;">${p.bloodGroup} ${p.rhesus}</span>
+        <span class="blood-badge">${p.bloodGroup} ${p.rhesus}</span>
       </div>
-      <div style="font-size:13px; color:var(--text-2); margin-top:6px;"><b>Allergiyalar:</b> <span style="color:var(--primary); font-weight:600;">${p.allergies?.join(', ') || 'Yo\'q'}</span></div>
-      <div style="font-size:13px; color:var(--text-2);"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Yo\'q'}</div>
-      <div style="font-size:13px; color:var(--text-2);"><b>Qon tahlili / Infeksiya:</b> ${p.bloodTestResult || 'Normal'}</div>
-      <div style="font-size:13px; color:var(--text-2);"><b>ICE 1 (Yaqini):</b> ${p.contacts?.[0]?.name} (${p.contacts?.[0]?.phone})</div>
-      <div style="font-size:13px; color:var(--text-2);"><b>ICE 2 (Yaqini):</b> ${p.contacts?.[1]?.name} (${p.contacts?.[1]?.phone})</div>
+      <div style="margin-bottom:8px;">
+        <span class="alert-badge">⚠️ Allergiya: ${p.allergies?.join(', ') || 'Yo\'q'}</span>
+      </div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Yo\'q'}</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Qon tahlili / Infeksiya:</b> ${p.bloodTestResult || 'Normal'}</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:12px;"><b>ICE (Yaqinlari):</b> ${p.contacts?.[0]?.name} (${p.contacts?.[0]?.phone}) | ${p.contacts?.[1]?.name} (${p.contacts?.[1]?.phone})</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); pt-10px; margin-top:8px;">
+        <span style="font-size:12px; color:var(--success); font-weight:600;">● Barqaror nazoratda</span>
+        <a href="tel:${p.contacts?.[0]?.phone}" style="background:var(--success-light); color:var(--success); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;">📞 Qo'ng'iroq</a>
+      </div>
     `;
     list.appendChild(card);
   });
@@ -544,11 +604,12 @@ async function searchDoctorDonors() {
             <div style="font-size:12px; color:var(--success); font-weight:600; margin-top:2px;">✓ Oxirgi donorlik: 3 oydan oldin (Xavfsiz)</div>
             <div style="font-size:12px; color:var(--text-2);"><b>Ish joyi:</b> ${d.workplace || 'Kiritilmagan'}</div>
           </div>
-          <span style="background:var(--primary-light); color:var(--primary); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">${d.bloodGroup} ${d.rhesus}</span>
+          <span class="blood-badge">${d.bloodGroup} ${d.rhesus}</span>
         </div>
         <div style="margin-top:10px; font-size:13px; color:var(--text-2);"><b>Telefon:</b> ${d.contacts?.[0]?.phone || '-'}</div>
         <div style="font-size:13px; color:var(--text-2);"><b>Kasallik tarixi (Anamnez):</b> ${d.chronic || 'Surunkali kasalliklar yo\'q'}</div>
         <div style="font-size:13px; color:var(--text-2);"><b>Qon tahlili natijasi:</b> ${d.bloodTestResult || 'Normal'}</div>
+        <div style="margin-top:10px;"><a href="tel:${d.contacts?.[0]?.phone}" class="btn-primary" style="padding:10px; text-decoration:none; text-align:center; display:block;">📞 Tezkor qo'ng'iroq</a></div>
       </div>
     `;
   });
@@ -644,14 +705,14 @@ async function saveNewPatientFinal() {
       { name: '2-Yaqini', phone: document.getElementById('pContact2').value || '+998 93 987 65 43' }
     ],
     fingerprintId: currentFpId || 'fp_' + Date.now(),
-    isDonor: document.getElementById('donorToggle').classList.contains('on'),
+    isDonor: document.getElementById('donorToggle').checked,
     lastDonationDate: document.getElementById('pLastDonation').value || '2024-01-15'
   };
 
   await window.LifeIDApi.registerPatient(patient);
   showToast("Bemor bazaga muvaffaqiyatli qo'shildi!");
   goToStep(1);
-  switchTab('dashboard', document.querySelectorAll('.nav-tab')[0]);
+  switchTab('dashboard', document.querySelectorAll('.nav-item')[0]);
 }
 
 // 🚨 FAVQULODDA TEZ TIBBIY YORDAM SKANERI (Hushsiz bemor uchun)
@@ -669,11 +730,11 @@ async function performEmergencyScan() {
           <div style="font-size:16px; font-weight:700; color:var(--primary-dark); margin-bottom:10px;">🚨 ТЕЗ YORDAM KARTASI (TOPILDI)</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Ism-familiya:</b> ${p.lastName} ${p.firstName} ${p.middleName||''}</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Pasport raqami:</b> <span style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</span></div>
-          <div style="font-size:14px; margin-bottom:6px;"><b>Qon guruhi:</b> <span style="background:var(--primary); color:#fff; padding:2px 8px; border-radius:6px; font-weight:700;">${p.bloodGroup} ${p.rhesus}</span></div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Qon guruhi:</b> <span class="blood-badge">${p.bloodGroup} ${p.rhesus}</span></div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Qon tahlili / Infeksiya:</b> <span style="color:var(--primary); font-weight:600;">${p.bloodTestResult || 'Normal'}</span></div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Kiritilmagan'}</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Alergiyalar:</b> <span style="color:var(--primary); font-weight:700;">${p.allergies?.join(', ') || 'Yo\'q'}</span></div>
-          <div style="font-size:14px; margin-top:10px; border-top:1px card-border; pt-2;">
+          <div style="font-size:14px; margin-top:10px; border-top:1px solid var(--red-border); padding-top:8px;">
             <b>📞 1-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[0]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[0]?.phone || '-'}</a><br>
             <b>📞 2-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[1]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[1]?.phone || '-'}</a>
           </div>
