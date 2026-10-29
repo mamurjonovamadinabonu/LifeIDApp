@@ -100,15 +100,20 @@ input[type=text], input[type=date], input[type=tel], select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(197,25,45,0.1); }
 
 /* BLOOD GROUP SELECTOR CARDS */
-.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 .blood-card {
   background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px;
-  cursor: pointer; transition: all 0.15s; position: relative;
+  cursor: pointer; transition: all 0.15s; position: relative; text-align: center;
 }
 .blood-card.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
 .blood-card-title { font-size: 16px; font-weight: 700; font-family: 'DM Mono', monospace; }
-.blood-card-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-.blood-card.selected .blood-card-sub { color: rgba(255,255,255,0.8); }
+
+.rhesus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.rhesus-card {
+  background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px;
+  cursor: pointer; transition: all 0.15s; text-align: center; font-weight: 700; font-family: 'DM Mono', monospace; font-size: 15px;
+}
+.rhesus-card.selected { background: var(--success); border-color: var(--success); color: #fff; }
 
 /* TAGS & BADGES */
 .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -248,19 +253,30 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     <!-- STEP 2 -->
     <div class="wizard-step" id="wizardStep2" style="display:none;">
       <div class="card">
-        <div class="card-header-flex"><div class="card-icon">🩺</div><div><div class="card-title">Klinik ko'rsatkichlar & Qon Tahlili</div><div class="card-desc">Infeksiyalar, oq qon, СПИД va asosiy kasallik tarixi</div></div></div>
+        <div class="card-header-flex"><div class="card-icon">🩺</div><div><div class="card-title">Klinik ko'rsatkichlar & Qon Tahlili</div><div class="card-desc">Qon guruhi, rezus omil (+/-), infeksiyalar va kasallik tarixi</div></div></div>
+
+        <!-- QON GURUHI -->
         <div class="field">
-          <label>QON GURUHI VA REZUS OMIL <span class="req">*</span></label>
+          <label>QON GURUHI <span class="req">*</span></label>
           <div class="blood-grid">
-            <div class="blood-card selected" onclick="selectBloodCard(this, 'O (I)', 'Rh+')"><div class="blood-card-title">O(I) Rh+</div><div class="blood-card-sub">Universal donor</div></div>
-            <div class="blood-card" onclick="selectBloodCard(this, 'A (II)', 'Rh+')"><div class="blood-card-title">A(II) Rh+</div><div class="blood-card-sub">Ikkinchi musbat</div></div>
-            <div class="blood-card" onclick="selectBloodCard(this, 'B (III)', 'Rh+')"><div class="blood-card-title">B(III) Rh+</div><div class="blood-card-sub">Uchinchi musbat</div></div>
-            <div class="blood-card" onclick="selectBloodCard(this, 'AB (IV)', 'Rh+')"><div class="blood-card-title">AB(IV) Rh+</div><div class="blood-card-sub">To'rtinchi musbat</div></div>
+            <div class="blood-card selected" onclick="selectBloodGroup(this, 'O (I)')"><div class="blood-card-title">I (O)</div></div>
+            <div class="blood-card" onclick="selectBloodGroup(this, 'A (II)')"><div class="blood-card-title">II (A)</div></div>
+            <div class="blood-card" onclick="selectBloodGroup(this, 'B (III)')"><div class="blood-card-title">III (B)</div></div>
+            <div class="blood-card" onclick="selectBloodGroup(this, 'AB (IV)')"><div class="blood-card-title">IV (AB)</div></div>
+          </div>
+        </div>
+
+        <!-- REZUS FAKTOR (+ / -) -->
+        <div class="field">
+          <label>REZUS FAKTOR (+ / -) <span class="req">*</span></label>
+          <div class="rhesus-grid">
+            <div class="rhesus-card selected" onclick="selectRhesus(this, 'Rh+')">Rh+ (Musbat)</div>
+            <div class="rhesus-card" onclick="selectRhesus(this, 'Rh-')">Rh- (Manfiy)</div>
           </div>
         </div>
 
         <div class="field">
-          <label>QON TAHLILI NATI贾LARI & INFEKSIYALAR (СПИД, Oq qon/Leykoz va h.k.)</label>
+          <label>QON TAHLILI NATIJALARI & INFEKSIYALAR (СПИД, Oq qon/Leykoz va h.k.)</label>
           <select id="pBloodTestResult">
             <option>Sog'lom / Infeksiyasiz (Normal)</option>
             <option>Oq qon kasalligi (Leykoz / Gematologik patologiya)</option>
@@ -553,10 +569,15 @@ function goToStep(step) {
   if (step === 4) populateReviewSummary();
 }
 
-function selectBloodCard(el, group, rh) {
-  document.querySelectorAll('.blood-card').forEach(c => c.classList.remove('selected'));
+function selectBloodGroup(el, group) {
+  document.querySelectorAll('#wizardStep2 .blood-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   selectedBlood = group;
+}
+
+function selectRhesus(el, rh) {
+  document.querySelectorAll('.rhesus-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
   selectedRhesus = rh;
 }
 
@@ -645,14 +666,14 @@ async function performEmergencyScan() {
     if (p) {
       res.innerHTML = `
         <div style="background:var(--primary-light); border:2px solid var(--primary); border-radius:14px; padding:16px; margin-top:10px;">
-          <div style="font-size:16px; font-weight:700; color:var(--primary-dark); margin-bottom:10px;">🚨 TЕZ YORDAM KARTASI (TOPILDI)</div>
+          <div style="font-size:16px; font-weight:700; color:var(--primary-dark); margin-bottom:10px;">🚨 ТЕЗ YORDAM KARTASI (TOPILDI)</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Ism-familiya:</b> ${p.lastName} ${p.firstName} ${p.middleName||''}</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Pasport raqami:</b> <span style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</span></div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Qon guruhi:</b> <span style="background:var(--primary); color:#fff; padding:2px 8px; border-radius:6px; font-weight:700;">${p.bloodGroup} ${p.rhesus}</span></div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Qon tahlili / Infeksiya:</b> <span style="color:var(--primary); font-weight:600;">${p.bloodTestResult || 'Normal'}</span></div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Kiritilmagan'}</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Alergiyalar:</b> <span style="color:var(--primary); font-weight:700;">${p.allergies?.join(', ') || 'Yo\'q'}</span></div>
-          <div style="font-size:14px; margin-top:10px; border-top:1px solid var(--red-border); pt-2;">
+          <div style="font-size:14px; margin-top:10px; border-top:1px card-border; pt-2;">
             <b>📞 1-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[0]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[0]?.phone || '-'}</a><br>
             <b>📞 2-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[1]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[1]?.phone || '-'}</a>
           </div>
