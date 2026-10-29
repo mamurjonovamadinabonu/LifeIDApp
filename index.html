@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeID — Shifokor Portali</title>
+<title>LifeID — Shifokor Portali & Favqulodda Skaner</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="db.js"></script>
 <script src="apiService.js"></script>
@@ -230,11 +230,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     <!-- STEP 1 -->
     <div class="wizard-step" id="wizardStep1">
       <div class="card">
-        <div class="card-header-flex"><div class="card-icon">👤</div><div><div class="card-title">Shaxsiy ma'lumotlar</div><div class="card-desc">Pasport va shaxs haqida asosiy ma'lumotlar</div></div></div>
+        <div class="card-header-flex"><div class="card-icon">👤</div><div><div class="card-title">Shaxsiy ma'lumotlar & Ish joyi</div><div class="card-desc">Pasport, shaxs va ish joyi haqida asosiy ma'lumotlar</div></div></div>
         <div class="field"><label>Familiya <span class="req">*</span></label><input type="text" id="pLastName" placeholder="Abdullayev" /></div>
         <div class="field"><label>Ism <span class="req">*</span></label><input type="text" id="pFirstName" placeholder="Xurshid" /></div>
         <div class="field"><label>Sharif (Otasining ismi)</label><input type="text" id="pMiddleName" placeholder="Mirzoevich" /></div>
         <div class="field"><label>Tug'ilgan sana <span class="req">*</span></label><input type="date" id="pBirthDate" value="1985-03-15" /></div>
+        <div class="field"><label>Ish joyi / Lavozimi</label><input type="text" id="pWorkplace" placeholder="Toshkent mexanika zavodi, muhandis" /></div>
         <div class="field"><label>Jinsi <span class="req">*</span></label><select id="pGender"><option>Erkak</option><option>Ayol</option></select></div>
         <div class="field"><label>Millati</label><select id="pNationality"><option>O'zbek</option><option>Rus</option><option>Tojik</option><option>Boshqa</option></select></div>
         <div class="field"><label>Fuqaroligi</label><select id="pCitizenship"><option>O'zbekiston</option><option>Boshqa</option></select></div>
@@ -247,7 +248,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     <!-- STEP 2 -->
     <div class="wizard-step" id="wizardStep2" style="display:none;">
       <div class="card">
-        <div class="card-header-flex"><div class="card-icon">🩺</div><div><div class="card-title">Klinik ko'rsatkichlar & Tibbiy ma'lumot</div><div class="card-desc">Favqulodda vaziyatlarda tezkor yordam uchun zarur parametrlar</div></div></div>
+        <div class="card-header-flex"><div class="card-icon">🩺</div><div><div class="card-title">Klinik ko'rsatkichlar & Qon Tahlili</div><div class="card-desc">Infeksiyalar, oq qon, СПИД va asosiy kasallik tarixi</div></div></div>
         <div class="field">
           <label>QON GURUHI VA REZUS OMIL <span class="req">*</span></label>
           <div class="blood-grid">
@@ -257,6 +258,18 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
             <div class="blood-card" onclick="selectBloodCard(this, 'AB (IV)', 'Rh+')"><div class="blood-card-title">AB(IV) Rh+</div><div class="blood-card-sub">To'rtinchi musbat</div></div>
           </div>
         </div>
+
+        <div class="field">
+          <label>QON TAHLILI NATI贾LARI & INFEKSIYALAR (СПИД, Oq qon/Leykoz va h.k.)</label>
+          <select id="pBloodTestResult">
+            <option>Sog'lom / Infeksiyasiz (Normal)</option>
+            <option>Oq qon kasalligi (Leykoz / Gematologik patologiya)</option>
+            <option>OIV / СПИД (HIV pozitiv)</option>
+            <option>Gepatit B / C infeksiyasi</option>
+            <option>Boshqa jiddiy infeksion patologiya</option>
+          </select>
+        </div>
+
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
           <div class="field"><label>Qon bosimi</label><input type="text" id="pBp" placeholder="120/80" /></div>
           <div class="field"><label>Vazn (kg)</label><input type="text" id="pWeight" placeholder="75" /></div>
@@ -274,8 +287,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
             <div class="custom-tag">Novokain <button onclick="this.parentElement.remove()">×</button></div>
           </div>
         </div>
-        <div class="field"><label>Surunkali kasalliklar (Kasallik tarixi)</label><input type="text" id="pChronic" placeholder="Bronxial astma..." /></div>
-        <div class="field"><label>Doimiy dori vositalari</label><input type="text" id="pMedications" placeholder="Salbutamol spreyi..." /></div>
+        <div class="field"><label>Asosiy kasallik tarixi (Anamnez)</label><input type="text" id="pChronic" placeholder="Bronxial astma, Gipertenziya..." /></div>
+
+        <div class="field">
+          <label>2 TA YAQINLARINING TELEFON RAQAMI (Favqulodda ICE)</label>
+          <input type="text" id="pContact1" placeholder="1-shaxs: +998 90 123 45 67 (Otasi)" style="margin-bottom:8px;" />
+          <input type="text" id="pContact2" placeholder="2-shaxs: +998 93 987 65 43 (Turmush o'rtog'i)" />
+        </div>
       </div>
       <div style="display:flex; gap:10px;"><button class="btn-secondary" onclick="goToStep(1)">← Orqaga</button><button class="btn-primary" onclick="goToStep(3)">Keyingisi (3-qadam) →</button></div>
     </div>
@@ -325,15 +343,15 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     <div id="doctorDonorResults" style="display:flex; flex-direction:column; gap:12px;"></div>
   </div>
 
-  <!-- VIEW 5: SKANER -->
-  <div id="view-scanner" class="view-section" style="text-align:center; padding-top:40px;">
-    <div class="card" style="padding:30px;">
-      <div style="font-size:18px; font-weight:700; color:var(--primary); margin-bottom:8px;">Tezkor Biometrik Skaner</div>
-      <div style="font-size:13px; color:var(--text-3); margin-bottom:24px;">Bemorning shaxsini aniqlash uchun barmoq izini bosing</div>
-      <div style="width:140px; height:140px; border-radius:50%; background:var(--primary-light); border:4px solid var(--primary); margin:0 auto 24px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="performQuickScan()">
-        <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+  <!-- VIEW 5: SKANER (FAVQULODDA TEZ TIBBIY YORDAM) -->
+  <div id="view-scanner" class="view-section" style="text-align:center; padding-top:20px;">
+    <div class="card" style="padding:24px;">
+      <div style="font-size:18px; font-weight:700; color:var(--primary); margin-bottom:4px;">🚨 Favqulodda Skaner (Tez Yordam)</div>
+      <div style="font-size:12.5px; color:var(--text-3); margin-bottom:20px;">Hushsiz bemor barmoq izini skanerlaganda barcha hayotiy ma'lumotlar darhol chiqadi.</div>
+      <div style="width:120px; height:120px; border-radius:50%; background:var(--primary-light); border:3px solid var(--primary); margin:0 auto 20px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="performEmergencyScan()">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
       </div>
-      <div id="quickScanResult" style="font-size:14px; font-weight:600; color:var(--text);">Skanerga bosing...</div>
+      <div id="quickScanResult" style="text-align:left; margin-top:10px;"></div>
     </div>
   </div>
 
@@ -358,7 +376,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     <button class="nav-tab active" onclick="switchTab('dashboard', this)">Bosh sahifa</button>
     <button class="nav-tab" onclick="switchTab('patientsList', this)">Tibbiy karta</button>
     <button class="nav-tab" onclick="switchTab('donorsSearch', this)">Donorlar</button>
-    <button class="nav-tab" onclick="switchTab('scanner', this)">Skaner</button>
+    <button class="nav-tab" onclick="switchTab('scanner', this)">🚨 Skaner</button>
     <button class="nav-tab" onclick="switchTab('profile', this)">Profil</button>
   </nav>
 
@@ -419,7 +437,7 @@ function switchTab(tabName, el) {
     el.classList.add('active');
   }
 
-  const titles = { dashboard: "Bosh sahifa", addPatient: "Yangi bemor qo'shish", patientsList: "Bemorlar tibbiy kartasi", donorsSearch: "Qon Donorlarini Qidirish", scanner: "Biometrik Skaner", profile: "Shifokor Profili" };
+  const titles = { dashboard: "Bosh sahifa", addPatient: "Yangi bemor qo'shish", patientsList: "Bemorlar tibbiy kartasi", donorsSearch: "Qon Donorlarini Qidirish", scanner: "Favqulodda Skaner", profile: "Shifokor Profili" };
   document.getElementById('headerTitle').textContent = titles[tabName] || "LifeID";
 
   if (tabName === 'dashboard') loadDashboard();
@@ -466,13 +484,16 @@ async function loadPatientsList() {
       <div style="display:flex; justify-content:between; align-items:flex-start; margin-bottom:10px;">
         <div>
           <div style="font-size:16px; font-weight:700;">${p.lastName} ${p.firstName} ${p.middleName||''}</div>
-          <div style="font-size:12px; color:var(--text-3);">Tug'ilgan: ${p.birthDate} · Pasport: ${p.passportSeries} ${p.passportNumber}</div>
+          <div style="font-size:12px; color:var(--text-3);">Pasport: ${p.passportSeries} ${p.passportNumber} · JSHSHIR: ${p.jshshir}</div>
+          <div style="font-size:12px; color:var(--text-2);"><b>Ish joyi:</b> ${p.workplace || 'Kiritilmagan'}</div>
         </div>
         <span style="background:var(--success-light); color:var(--success); padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:600;">${p.bloodGroup} ${p.rhesus}</span>
       </div>
-      <div style="font-size:13px; color:var(--text-2); margin-top:6px;"><b>Allergiyalar:</b> ${p.allergies?.join(', ') || 'Yo\'q'}</div>
-      <div style="font-size:13px; color:var(--text-2);"><b>Kasallik tarixi:</b> ${p.chronic || 'Yo\'q'}</div>
-      <div style="font-size:13px; color:var(--text-2);"><b>Telefon:</b> ${p.contacts?.[0]?.phone || 'Kiritilmagan'}</div>
+      <div style="font-size:13px; color:var(--text-2); margin-top:6px;"><b>Allergiyalar:</b> <span style="color:var(--primary); font-weight:600;">${p.allergies?.join(', ') || 'Yo\'q'}</span></div>
+      <div style="font-size:13px; color:var(--text-2);"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Yo\'q'}</div>
+      <div style="font-size:13px; color:var(--text-2);"><b>Qon tahlili / Infeksiya:</b> ${p.bloodTestResult || 'Normal'}</div>
+      <div style="font-size:13px; color:var(--text-2);"><b>ICE 1 (Yaqini):</b> ${p.contacts?.[0]?.name} (${p.contacts?.[0]?.phone})</div>
+      <div style="font-size:13px; color:var(--text-2);"><b>ICE 2 (Yaqini):</b> ${p.contacts?.[1]?.name} (${p.contacts?.[1]?.phone})</div>
     `;
     list.appendChild(card);
   });
@@ -484,12 +505,10 @@ async function searchDoctorDonors() {
   const results = document.getElementById('doctorDonorResults');
   results.innerHTML = '';
 
-  // Strict 3-month rule check + Disease History (Kasallik tarixi)
   const now = new Date();
   const filtered = donors.filter(d => {
     const matches = d.bloodGroup && d.bloodGroup.includes(targetBlood.split(' ')[0]);
     if (!matches) return false;
-
     const lastDonation = new Date(d.lastDonationDate || '2024-01-01');
     const diffMonths = (now.getFullYear() - lastDonation.getFullYear()) * 12 + (now.getMonth() - lastDonation.getMonth());
     return diffMonths >= 3;
@@ -506,13 +525,14 @@ async function searchDoctorDonors() {
         <div style="display:flex; justify-content:between; align-items:flex-start;">
           <div>
             <div style="font-size:16px; font-weight:700;">${d.lastName} ${d.firstName}</div>
-            <div style="font-size:12px; color:var(--success); font-weight:600; margin-top:2px;">✓ Oxirgi donorlik: ${d.lastDonationDate || '3 oydan oldin'} (Xavfsiz)</div>
+            <div style="font-size:12px; color:var(--success); font-weight:600; margin-top:2px;">✓ Oxirgi donorlik: 3 oydan oldin (Xavfsiz)</div>
+            <div style="font-size:12px; color:var(--text-2);"><b>Ish joyi:</b> ${d.workplace || 'Kiritilmagan'}</div>
           </div>
           <span style="background:var(--primary-light); color:var(--primary); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">${d.bloodGroup} ${d.rhesus}</span>
         </div>
-        <div style="margin-top:10px; font-size:13px; color:var(--text-2);"><b>Telefon:</b> ${d.contacts?.[0]?.phone || 'Kiritilmagan'}</div>
+        <div style="margin-top:10px; font-size:13px; color:var(--text-2);"><b>Telefon:</b> ${d.contacts?.[0]?.phone || '-'}</div>
         <div style="font-size:13px; color:var(--text-2);"><b>Kasallik tarixi (Anamnez):</b> ${d.chronic || 'Surunkali kasalliklar yo\'q'}</div>
-        <div style="font-size:13px; color:var(--text-2);"><b>Allergiyalar:</b> ${d.allergies?.join(', ') || 'Yo\'q'}</div>
+        <div style="font-size:13px; color:var(--text-2);"><b>Qon tahlili natijasi:</b> ${d.bloodTestResult || 'Normal'}</div>
       </div>
     `;
   });
@@ -581,15 +601,16 @@ async function saveNewPatientFinal() {
     lastName, firstName,
     middleName: document.getElementById('pMiddleName').value,
     birthDate: document.getElementById('pBirthDate').value,
+    workplace: document.getElementById('pWorkplace').value,
     gender: document.getElementById('pGender').value,
     nationality: document.getElementById('pNationality').value,
     citizenship: document.getElementById('pCitizenship').value,
     passportSeries: document.getElementById('pPassportSeries').value,
     passportNumber: document.getElementById('pPassportNumber').value,
     jshshir: document.getElementById('pJshshir').value,
-    address: 'Toshkent sh.',
     bloodGroup: selectedBlood,
     rhesus: selectedRhesus,
+    bloodTestResult: document.getElementById('pBloodTestResult').value,
     bp: document.getElementById('pBp').value || '120/80',
     weight: document.getElementById('pWeight').value || '75',
     height: document.getElementById('pHeight').value || '175',
@@ -597,7 +618,10 @@ async function saveNewPatientFinal() {
     chronic: document.getElementById('pChronic').value,
     allergies,
     medications: document.getElementById('pMedications').value,
-    contacts: [{ name: 'Jalolov Akram', relation: 'Otasi', phone: '+998 90 123 45 67' }],
+    contacts: [
+      { name: '1-Yaqini', phone: document.getElementById('pContact1').value || '+998 90 123 45 67' },
+      { name: '2-Yaqini', phone: document.getElementById('pContact2').value || '+998 93 987 65 43' }
+    ],
     fingerprintId: currentFpId || 'fp_' + Date.now(),
     isDonor: document.getElementById('donorToggle').classList.contains('on'),
     lastDonationDate: document.getElementById('pLastDonation').value || '2024-01-15'
@@ -609,23 +633,33 @@ async function saveNewPatientFinal() {
   switchTab('dashboard', document.querySelectorAll('.nav-tab')[0]);
 }
 
-async function performQuickScan() {
+// 🚨 FAVQULODDA TEZ TIBBIY YORDAM SKANERI (Hushsiz bemor uchun)
+async function performEmergencyScan() {
   const res = document.getElementById('quickScanResult');
-  res.textContent = 'Biometrik skaner ishlamoqda...';
+  res.innerHTML = '<div style="color:var(--primary); font-weight:600; text-align:center; padding:10px;">🚨 Skaner ishlamoqda...</div>';
   const scan = await window.BioScanner.scanFingerprint();
   if (scan.success) {
-    res.textContent = 'Bemor qidirilmoqda...';
     const patient = await window.LifeIDApi.scanPatientByFingerprint(scan.fpId);
-    if (patient) {
-      res.innerHTML = `<span style="color:var(--success)">✓ Bemor topildi:</span> <b>${patient.lastName} ${patient.firstName}</b> (${patient.bloodGroup} ${patient.rhesus}) - Kasallik tarixi: ${patient.chronic || 'Yo\'q'}`;
+    const p = patient || (await window.LifeIDDB.getPatients()).slice(-1)[0];
+
+    if (p) {
+      res.innerHTML = `
+        <div style="background:var(--primary-light); border:2px solid var(--primary); border-radius:14px; padding:16px; margin-top:10px;">
+          <div style="font-size:16px; font-weight:700; color:var(--primary-dark); margin-bottom:10px;">🚨 TЕZ YORDAM KARTASI (TOPILDI)</div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Ism-familiya:</b> ${p.lastName} ${p.firstName} ${p.middleName||''}</div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Pasport raqami:</b> <span style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</span></div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Qon guruhi:</b> <span style="background:var(--primary); color:#fff; padding:2px 8px; border-radius:6px; font-weight:700;">${p.bloodGroup} ${p.rhesus}</span></div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Qon tahlili / Infeksiya:</b> <span style="color:var(--primary); font-weight:600;">${p.bloodTestResult || 'Normal'}</span></div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Kiritilmagan'}</div>
+          <div style="font-size:14px; margin-bottom:6px;"><b>Alergiyalar:</b> <span style="color:var(--primary); font-weight:700;">${p.allergies?.join(', ') || 'Yo\'q'}</span></div>
+          <div style="font-size:14px; margin-top:10px; border-top:1px solid var(--red-border); pt-2;">
+            <b>📞 1-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[0]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[0]?.phone || '-'}</a><br>
+            <b>📞 2-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[1]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[1]?.phone || '-'}</a>
+          </div>
+        </div>
+      `;
     } else {
-      const patients = await window.LifeIDDB.getPatients();
-      if (patients.length > 0) {
-        const p = patients[patients.length - 1];
-        res.innerHTML = `<span style="color:var(--success)">✓ Bemor topildi:</span> <b>${p.lastName} ${p.firstName}</b> (${p.bloodGroup} ${p.rhesus}) - Kasallik tarixi: ${p.chronic || 'Yo\'q'}`;
-      } else {
-        res.innerHTML = `<span style="color:var(--primary)">Bemor topilmadi. Avval bemor qo'shing.</span>`;
-      }
+      res.innerHTML = `<div style="color:var(--primary); text-align:center; padding:10px;">Bemor topilmadi. Avval bemor ro'yxatdan o'tkazing.</div>`;
     }
   }
 }
