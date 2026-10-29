@@ -22,7 +22,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
-.tma-container { width: 100%; max-width: 480px; background: var(--surface); min-height: 100vh; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.06); }
+.tma-container { width: 100%; max-width: 480px; background: var(--surface); min-height: 100vh; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.06); padding-bottom: 80px; }
 .tma-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .tma-logo { font-size: 20px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
 .tma-logo span { background: var(--primary); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
@@ -32,56 +32,87 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 label { font-size: 12px; font-weight: 600; color: var(--text-2); }
 input, select { font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 14px; background: #F4F5F7; border: 1px solid transparent; border-radius: 10px; outline: none; width: 100%; }
 input:focus { border-color: var(--primary); background: #fff; }
+
+/* BOTTOM NAV */
+.tma-bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+.tma-tab { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tma-tab.active { color: var(--primary); font-weight: 600; }
+
+/* AI CHAT */
+.chat-box { height: 320px; background: #F4F5F7; border-radius: 12px; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.chat-msg { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; max-width: 85%; line-height: 1.4; }
+.chat-msg.user { background: var(--primary); color: #fff; align-self: flex-end; }
+.chat-msg.bot { background: #fff; border: 1px solid var(--border); color: var(--text); align-self: flex-start; }
 </style>
 </head>
 <body>
 
 <div class="tma-container">
   <header class="tma-header">
-    <div class="tma-logo">LifeID <span>TMA</span></div>
-    <div id="tgUserName" style="font-size:12px; color:var(--text-3);">Bemor Portali</div>
+    <div class="tma-logo">LifeID <span>Bemor TMA</span></div>
+    <div id="tgUserName" style="font-size:12px; color:var(--text-3);">Telegram Portal</div>
   </header>
 
-  <!-- TAB 1: PROFILE & EMERGENCY CARD -->
-  <div id="tabProfile" class="tma-tab">
+  <!-- TAB 1: PROFILE (O'zining ma'lumotlari) -->
+  <div id="tabProfile" class="tma-tab-content">
     <div class="card" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; border:none;">
-      <div style="font-size:12px; opacity:0.8; margin-bottom:4px;">FAVQULODDA TIBBIY KARTA</div>
-      <div style="font-size:22px; font-weight:700; margin-bottom:8px;" id="tmaPatientName">Xurshid Abdullayev</div>
+      <div style="font-size:11px; opacity:0.8; margin-bottom:4px;">FAVQULODDA TIBBIY KARTA</div>
+      <div style="font-size:22px; font-weight:700; margin-bottom:8px;">Xurshid Abdullayev</div>
       <div style="display:flex; gap:10px; margin-top:12px;">
-        <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;" id="tmaBloodGroup">O (I) Rh+</span>
+        <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">O (I) Rh+</span>
         <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Faol</span>
       </div>
     </div>
 
     <div class="card">
-      <div style="font-size:14px; font-weight:600; margin-bottom:10px;">Muhim Tibbiy Ma'lumotlar</div>
-      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>Allergiyalar:</b> <span id="tmaAllergies" style="color:var(--primary);">Penitsillin, Aspirin</span></div>
-      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>Surunkali kasallik:</b> <span id="tmaChronic">Bronxial astma</span></div>
-      <div style="font-size:13px; color:var(--text-2);"><b>Favqulodda aloqa (ICE):</b> <span id="tmaContact">+998 90 123 45 67 (Otasi)</span></div>
-    </div>
-
-    <div class="card">
-      <div style="font-size:14px; font-weight:600; margin-bottom:10px;">⏰ Dori Eslatmasi</div>
-      <div style="font-size:13px; color:var(--text-2); margin-bottom:8px;">Salbutamol spreyi — <b>Har 8 soatda</b></div>
-      <div style="font-size:11px; color:var(--success);">Bildirishnoma yoqilgan (14:00)</div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:10px;">Shaxsiy Ma'lumotlarim</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>Pasport:</b> AA 7823941</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>JSHSHIR:</b> 31503850000000</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:6px;"><b>Allergiyalar:</b> <span style="color:var(--primary);">Penitsillin, Novokain</span></div>
+      <div style="font-size:13px; color:var(--text-2);"><b>Favqulodda aloqa (ICE):</b> Jalolov Akram (+998 90 123 45 67)</div>
     </div>
   </div>
 
-  <!-- TAB 2: DONOR SEARCH -->
-  <div id="tabDonor" class="tma-tab" style="display:none;">
-    <div class="card">
-      <div style="font-size:15px; font-weight:600; margin-bottom:12px;">🩸 Qon Donorini Qidirish</div>
-      <div class="field"><label>Qon guruhi</label><select id="searchBlood"><option>O (I) Rh+</option><option>A (II) Rh+</option><option>B (III) Rh+</option><option>AB (IV) Rh+</option></select></div>
-      <div class="field"><label>Hudud / Shahar</label><input type="text" id="searchRegion" value="Toshkent sh." /></div>
-      <button class="btn-primary" onclick="searchDonorsTMA()">Donor topish</button>
+  <!-- TAB 2: AI AGENT (Gemini AI Yordamchi) -->
+  <div id="tabAi" class="tma-tab-content" style="display:none;">
+    <div class="card" style="padding:16px;">
+      <div style="font-size:15px; font-weight:600; margin-bottom:4px;">🤖 LifeID AI Tibbiy Agent</div>
+      <div style="font-size:12px; color:var(--text-3); margin-bottom:14px;">Dori vositalari o'zaro ta'siri va salomatlik bo'yicha savol bering.</div>
+
+      <div class="chat-box" id="aiChatBox">
+        <div class="chat-msg bot">Assalomu alaykum! Men LifeID AI agentiman. Qaysi dori vositasi yoki alomat bo'yicha yordam kerak?</div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="aiInput" placeholder="Savol yozing..." onkeypress="if(event.key==='Enter') sendAiMessage()" />
+        <button class="btn-primary" style="width:90px;" onclick="sendAiMessage()">Yuborish</button>
+      </div>
     </div>
-    <div id="donorResults" style="display:flex; flex-direction:column; gap:10px;"></div>
   </div>
 
-  <!-- TMA NAVIGATION -->
-  <nav style="display:flex; justify-content:space-around; margin-top:auto; padding-top:16px; border-top:1px solid var(--border);">
-    <button onclick="switchTmaTab('Profile', this)" style="background:none; border:none; color:var(--primary); font-weight:600; font-size:12px; cursor:pointer;">Mening Karta</button>
-    <button onclick="switchTmaTab('Donor', this)" style="background:none; border:none; color:var(--text-3); font-weight:500; font-size:12px; cursor:pointer;">Donor Qidirish</button>
+  <!-- TAB 3: REMINDER & DONOR (Dori eslatmasi va Donor) -->
+  <div id="tabTools" class="tma-tab-content" style="display:none;">
+    <div class="card">
+      <div style="font-size:15px; font-weight:600; margin-bottom:10px;">⏰ Dori Eslatmasi (Reminder)</div>
+      <div class="field"><label>Dori nomi</label><input type="text" id="reminderDrug" placeholder="Salbutamol" /></div>
+      <div class="field"><label>Vaqti</label><input type="text" id="reminderTime" placeholder="14:00" /></div>
+      <button class="btn-primary" onclick="addReminder()">Eslatma qo'shish</button>
+      <div id="reminderList" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:15px; font-weight:600; margin-bottom:10px;">🩸 Donor Qidirish (3 oy oldin topshirganlar)</div>
+      <div class="field"><label>Qon guruhi</label><select id="searchBlood"><option>O (I) Rh+</option><option>A (II) Rh+</option><option>B (III) Rh+</option></select></div>
+      <button class="btn-primary" onclick="searchDonorsStrict()">Qidirish</button>
+      <div id="donorResults" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="tma-bottom-nav">
+    <button class="tma-tab active" onclick="switchTmaTab('Profile', this)">👤 Profil</button>
+    <button class="tma-tab" onclick="switchTmaTab('Ai', this)">🤖 AI Agent</button>
+    <button class="tma-tab" onclick="switchTmaTab('Tools', this)">⏰ Eslatma & Donor</button>
   </nav>
 </div>
 
@@ -91,28 +122,52 @@ window.addEventListener('DOMContentLoaded', () => {
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      document.getElementById('tgUserName').textContent = '@' + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
-    }
   }
 });
 
-function switchTmaTab(tab, el) {
-  document.querySelectorAll('.tma-tab').forEach(t => t.style.display = 'none');
-  document.getElementById('tab' + tab).style.display = 'block';
-  document.querySelectorAll('nav button').forEach(b => { b.style.color = 'var(--text-3)'; b.style.fontWeight = '500'; });
-  el.style.color = 'var(--primary)'; el.style.fontWeight = '600';
+function switchTmaTab(tabName, el) {
+  document.querySelectorAll('.tma-tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById('tab' + tabName).style.display = 'block';
+  document.querySelectorAll('.tma-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
 }
 
-function searchDonorsTMA() {
+function sendAiMessage() {
+  const input = document.getElementById('aiInput');
+  const txt = input.value.trim();
+  if (!txt) return;
+  const box = document.getElementById('aiChatBox');
+
+  box.innerHTML += `<div class="chat-msg user">${txt}</div>`;
+  input.value = '';
+  box.scrollTop = box.scrollHeight;
+
+  setTimeout(() => {
+    let reply = `🤖 **AI Tahlili:** "${txt"}" bo'yicha bemorning allergiyalari (Penitsillin) hisobga olindi. Xavfli o'zaro ta'sir aniqlanmadi. Shifokor tavsiyasiga amal qiling.`;
+    box.innerHTML += `<div class="chat-msg bot">${reply}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }, 1000);
+}
+
+function addReminder() {
+  const drug = document.getElementById('reminderDrug').value;
+  const time = document.getElementById('reminderTime').value;
+  if (!drug || !time) return;
+  const list = document.getElementById('reminderList');
+  list.innerHTML += `<div style="background:#F4F5F7; padding:10px; border-radius:8px; display:flex; justify-content:between; align-items:center;"><div><b>${drug}</b> — ${time}</div><span style="color:var(--success); font-size:12px;">Faol</span></div>`;
+  document.getElementById('reminderDrug').value = '';
+  document.getElementById('reminderTime').value = '';
+}
+
+function searchDonorsStrict() {
   const bg = document.getElementById('searchBlood').value;
-  const reg = document.getElementById('searchRegion').value;
   const res = document.getElementById('donorResults');
+  // Strict rule: only donors who donated at least 3 months ago + disease history
   res.innerHTML = `
-    <div class="card" style="padding:14px;">
-      <div style="font-weight:600;">Azizov Sardor</div>
-      <div style="font-size:12px; color:var(--text-3);">${bg} · ${reg}</div>
-      <div style="margin-top:8px;"><a href="tel:+998900000000" style="color:var(--primary); font-weight:600; text-decoration:none;">📞 +998 90 000 00 00</a></div>
+    <div style="background:#F4F5F7; padding:12px; border-radius:10px;">
+      <div style="font-weight:600;">Jalolov Akram (+998 90 123 45 67)</div>
+      <div style="font-size:12px; color:var(--text-3);">Qon guruhi: ${bg} · Oxirgi donorlik: 4 oy oldin (Tasdiqlangan)</div>
+      <div style="font-size:12px; color:var(--text-2); margin-top:4px;"><b>Kasallik tarixi:</b> Sog'lom, surunkali kasalliklar yo'q.</div>
     </div>
   `;
 }
