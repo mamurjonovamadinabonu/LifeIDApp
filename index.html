@@ -65,11 +65,62 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .view-section.active-view { display: block; animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-/* CARDS */
+/* STEPS INDICATOR (FIXED HORIZONTAL GRID) */
+.steps-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 24px; }
+.step-item { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+.step-circle { width: 30px; height: 30px; border-radius: 50%; background: #EAEAEA; color: var(--text-3); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 2; margin-bottom: 4px; }
+.step-item.active .step-circle { background: var(--primary); color: #fff; }
+.step-item.completed .step-circle { background: var(--success); color: #fff; }
+.step-text { font-size: 10.5px; color: var(--text-3); font-weight: 500; }
+.step-item.active .step-text { color: var(--primary); font-weight: 600; }
+.step-line { position: absolute; top: 15px; left: 50%; width: 100%; height: 2px; background: #EAEAEA; z-index: 1; }
+.step-item:last-child .step-line { display: none; }
+
+/* CARDS & SECTIONS */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 .card-header-flex { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.card-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.card-desc { font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
 
-/* SEARCH BAR & PILLS */
+/* FORM FIELDS */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: 0.2px; }
+.field label .req { color: var(--primary); margin-left: 2px; }
+input[type=text], input[type=date], input[type=tel], select, textarea {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  background: #F4F5F7; border: 1px solid transparent; border-radius: 12px;
+  padding: 12px 14px; outline: none; transition: all 0.15s; width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(197,25,45,0.1); }
+
+/* BLOOD GROUP SELECTOR CARDS */
+.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.blood-card {
+  background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px;
+  cursor: pointer; transition: all 0.15s; text-align: center; font-weight: 700; font-family: 'DM Mono', monospace; font-size: 15px;
+}
+.blood-card.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.rhesus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.rhesus-card {
+  background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px;
+  cursor: pointer; transition: all 0.15s; text-align: center; font-weight: 700; font-family: 'DM Mono', monospace; font-size: 14px;
+}
+.rhesus-card.selected { background: var(--success); border-color: var(--success); color: #fff; }
+
+/* TAGS & BADGES */
+.tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.custom-tag {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary);
+  font-size: 12.5px; font-weight: 500; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--red-border);
+}
+.custom-tag button { background: none; border: none; cursor: pointer; color: var(--primary); font-size: 14px; display: flex; }
+
+.blood-badge { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; gap: 4px; }
+.alert-badge { background: var(--primary-light); color: var(--primary); border: 1px solid var(--red-border); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+
+/* SEARCH & PILLS */
 .search-input-wrap { position: relative; margin-bottom: 12px; }
 .search-input-wrap input { width: 100%; padding: 12px 14px 12px 40px; background: #F4F5F7; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; outline: none; }
 .search-input-wrap input:focus { border-color: var(--primary); background: #fff; }
@@ -79,14 +130,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .pill { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: #F4F5F7; font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap; color: var(--text-2); }
 .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-/* BADGES & TAGS */
-.blood-badge { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; gap: 4px; }
-.alert-badge { background: var(--primary-light); color: var(--primary); border: 1px solid var(--red-border); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
-
 /* BUTTONS */
-.btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: #fff; border: none; font-size: 14.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(197,25,45,0.25); }
+.btn-primary {
+  width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: #fff;
+  border: none; font-size: 14.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(197,25,45,0.25);
+}
 .btn-primary:hover { background: var(--primary-dark); }
-.btn-secondary { width: 100%; padding: 12px; border-radius: 12px; background: #F4F5F7; color: var(--text); border: none; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
+.btn-secondary {
+  width: 100%; padding: 12px; border-radius: 12px; background: #F4F5F7; color: var(--text);
+  border: none; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center;
+}
 
 /* BOTTOM NAVIGATION BAR */
 .bottom-nav {
@@ -113,22 +167,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .center-scanner-btn:hover { transform: scale(1.06); }
 .center-scanner-btn svg { width: 26px; height: 26px; }
 
-/* WIZARD & FORMS */
-.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
-input[type=text], input[type=date], input[type=tel], select, textarea {
-  font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 12px 14px; background: #F4F5F7; border: 1px solid var(--border); border-radius: 12px; outline: none; width: 100%;
-}
-input:focus, select:focus { border-color: var(--primary); background: #fff; }
-
-.blood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.blood-card { background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; font-weight: 700; font-family: 'DM Mono'; font-size: 15px; }
-.blood-card.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
-
-.rhesus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.rhesus-card { background: #F4F5F7; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; font-weight: 700; font-family: 'DM Mono'; font-size: 14px; }
-.rhesus-card.selected { background: var(--success); border-color: var(--success); color: #fff; }
-
+/* TOAST */
 .toast {
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-60px);
   background: var(--success); color: #fff; padding: 12px 20px; border-radius: 12px;
@@ -356,7 +395,7 @@ input:focus, select:focus { border-color: var(--primary); background: #fff; }
   <div id="view-donorsSearch" class="view-section">
     <div class="card">
       <div class="card-title" style="margin-bottom:6px;">🩸 Qon Donorlarini Qidirish</div>
-      <div class="card-desc" style="margin-bottom:14px;">Qon quyish bo'limi reglamenti: Faqat kamida 3 oy oldin qon topshirgan, infeksiyalarga tekshirilgan va sog'lom donorlar saralanib ko'rsatiladi.</div>
+      <div class="card-desc" style="margin-bottom:14px;">Qon quyish bo'limi reglamenti: Faqat kamida 3 oy oldin qon topshirgan, infeksiyalarga tekshirilgan va joriy holati faol bo'lgan donorlar saralanib ko'rsatiladi.</div>
       <div class="field"><label>Kerakli qon guruhi va rezus</label><select id="doctorSearchBlood"><option>O (I) Rh+</option><option>O (I) Rh-</option><option>A (II) Rh+</option><option>A (II) Rh-</option><option>B (III) Rh+</option><option>AB (IV) Rh+</option></select></div>
       <button class="btn-primary" onclick="searchDoctorDonors()">Donorlarni topish</button>
     </div>
@@ -392,7 +431,7 @@ input:focus, select:focus { border-color: var(--primary); background: #fff; }
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR (MOCKUP DESIGN WITH CENTER FLOATING SCANNER) -->
+  <!-- BOTTOM NAVIGATION BAR -->
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="switchTab('dashboard', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -403,7 +442,6 @@ input:focus, select:focus { border-color: var(--primary); background: #fff; }
       Tibbiy karta
     </button>
 
-    <!-- CENTER FLOATING SCANNER BUTTON -->
     <button class="center-scanner-btn" onclick="switchTab('scanner', this)" title="Favqulodda Skaner">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
     </button>
@@ -566,7 +604,7 @@ async function renderPatientsList(patients) {
       <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Yo\'q'}</div>
       <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Qon tahlili / Infeksiya:</b> ${p.bloodTestResult || 'Normal'}</div>
       <div style="font-size:13px; color:var(--text-2); margin-bottom:12px;"><b>ICE (Yaqinlari):</b> ${p.contacts?.[0]?.name} (${p.contacts?.[0]?.phone}) | ${p.contacts?.[1]?.name} (${p.contacts?.[1]?.phone})</div>
-      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); pt-10px; margin-top:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
         <span style="font-size:12px; color:var(--success); font-weight:600;">● Barqaror nazoratda</span>
         <a href="tel:${p.contacts?.[0]?.phone}" style="background:var(--success-light); color:var(--success); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;">📞 Qo'ng'iroq</a>
       </div>
