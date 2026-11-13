@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.LifeIDDoctorPortal" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your theme here -->
-        <item name="colorPrimary">#C5192D</item>
+    <style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
     </style>
 </resources>

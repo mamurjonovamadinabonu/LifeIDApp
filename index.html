@@ -216,6 +216,29 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 3000; opacity: 0; pointer-events: none;
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* TABLET & DESKTOP RESPONSIVE ADAPTATION */
+@media (min-width: 768px) {
+  body { background: #E2E8F0; padding: 30px; align-items: center; }
+  .app-container {
+    max-width: 960px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
+    min-height: calc(100vh - 60px) !important;
+    overflow: hidden;
+  }
+  .bottom-nav {
+    max-width: 960px !important;
+    border-radius: 0 0 24px 24px !important;
+  }
+  .blood-grid { grid-template-columns: repeat(4, 1fr) !important; }
+  .rhesus-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  #dashboardPatientsList, #fullPatientsList {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -229,7 +252,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
     <div class="field"><label>Mutaxassislik</label><input type="text" id="loginSpec" placeholder="Kardiolog • Reanimatolog" /></div>
     <div class="field"><label>Shifoxona</label><input type="text" id="loginClinic" placeholder="Toshkent shahar 1-son ShTTYO" /></div>
     <div class="field"><label>PIN kod</label><input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono'" /></div>
-    <button class="btn-primary" style="margin-top:10px;" onclick="handleDoctorLogin()">Tizimga kirish</button>
+    <button class="btn-primary" style="margin-top:10px;" onclick="handleDoctorLogin()">Tizimga kirish (PIN)</button>
+    <button class="btn-secondary" style="margin-top:10px; background:var(--primary-light); color:var(--primary);" onclick="handleBiometricLogin()">👆 Barmoq izi orqali kirish (Biometric)</button>
   </div>
 </div>
 
@@ -620,6 +644,12 @@ async function filterPatientsList() {
   renderPatientsList(filtered);
 }
 
+function makeTelLink(phone) {
+  if (!phone) return '#';
+  const cleanPhone = phone.replace(/[^+\d]/g, '');
+  return `tel:${cleanPhone}`;
+}
+
 async function renderPatientsList(patients) {
   const list = document.getElementById('fullPatientsList');
   list.innerHTML = '';
@@ -647,7 +677,7 @@ async function renderPatientsList(patients) {
       <div style="font-size:13px; color:var(--text-2); margin-bottom:12px;"><b>ICE (Yaqinlari):</b> ${p.contacts?.[0]?.name} (${p.contacts?.[0]?.phone}) | ${p.contacts?.[1]?.name} (${p.contacts?.[1]?.phone})</div>
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
         <span style="font-size:12px; color:var(--success); font-weight:600;">● Barqaror nazoratda</span>
-        <a href="tel:${p.contacts?.[0]?.phone}" style="background:var(--success-light); color:var(--success); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;">📞 Qo'ng'iroq</a>
+        <a href="${makeTelLink(p.contacts?.[0]?.phone)}" style="background:var(--success-light); color:var(--success); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;">📞 Qo'ng'iroq</a>
       </div>
     `;
     list.appendChild(card);
@@ -688,7 +718,7 @@ async function searchDoctorDonors() {
         <div style="margin-top:10px; font-size:13px; color:var(--text-2);"><b>Telefon:</b> ${d.contacts?.[0]?.phone || '-'}</div>
         <div style="font-size:13px; color:var(--text-2);"><b>Kasallik tarixi (Anamnez):</b> ${d.chronic || 'Surunkali kasalliklar yo\'q'}</div>
         <div style="font-size:13px; color:var(--text-2);"><b>Qon tahlili natijasi:</b> ${d.bloodTestResult || 'Normal'}</div>
-        <div style="margin-top:10px;"><a href="tel:${d.contacts?.[0]?.phone}" class="btn-primary" style="padding:10px; text-decoration:none; text-align:center; display:block;">📞 Tezkor qo'ng'iroq</a></div>
+        <div style="margin-top:10px;"><a href="${makeTelLink(d.contacts?.[0]?.phone)}" class="btn-primary" style="padding:10px; text-decoration:none; text-align:center; display:block;">📞 Tezkor qo'ng'iroq</a></div>
       </div>
     `;
   });
@@ -814,14 +844,28 @@ async function performEmergencyScan() {
           <div style="font-size:14px; margin-bottom:6px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Kiritilmagan'}</div>
           <div style="font-size:14px; margin-bottom:6px;"><b>Alergiyalar:</b> <span style="color:var(--primary); font-weight:700;">${p.allergies?.join(', ') || 'Yo\'q'}</span></div>
           <div style="font-size:14px; margin-top:10px; border-top:1px solid var(--red-border); padding-top:8px;">
-            <b>📞 1-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[0]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[0]?.phone || '-'}</a><br>
-            <b>📞 2-Yaqinining raqami:</b> <a href="tel:${p.contacts?.[1]?.phone}" style="color:var(--primary); font-weight:700;">${p.contacts?.[1]?.phone || '-'}</a>
+            <b>📞 1-Yaqinining raqami:</b> <a href="${makeTelLink(p.contacts?.[0]?.phone)}" style="color:var(--primary); font-weight:700;">${p.contacts?.[0]?.phone || '-'}</a><br>
+            <b>📞 2-Yaqinining raqami:</b> <a href="${makeTelLink(p.contacts?.[1]?.phone)}" style="color:var(--primary); font-weight:700;">${p.contacts?.[1]?.phone || '-'}</a>
           </div>
         </div>
       `;
     } else {
       res.innerHTML = `<div style="color:var(--primary); text-align:center; padding:10px;">Bemor topilmadi. Avval bemor ro'yxatdan o'tkazing.</div>`;
     }
+  }
+}
+
+async function handleBiometricLogin() {
+  showToast("Barmoq izi skaneri ishlamoqda...");
+  const res = await window.BioScanner.scanFingerprint();
+  if (res.success) {
+    const doc = { id: 'doc_48227', name: 'Dr. Jasur Karimov', spec: 'Kardiolog • Reanimatolog', clinic: 'Toshkent shahar 1-son ShTTYO', role: 'admin' };
+    window.LifeIDDB.loginDoctor(doc);
+    checkDoctorAuth();
+    loadDashboard();
+    showToast("Biometrik tasdiqlandi. Xush kelibsiz!");
+  } else {
+    alert("Barmoq izi tanilmadi!");
   }
 }
 

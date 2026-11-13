@@ -4,13 +4,8 @@ class LifeIDDatabase {
     this.dbName = 'LifeIDDB';
     this.version = 6;
     this.db = null;
-    this.currentDoctor = JSON.parse(localStorage.getItem('lifeid_doctor_session')) || {
-      id: 'doc_48227',
-      name: 'Dr. Jasur Karimov',
-      spec: 'Kardiolog • Reanimatolog',
-      clinic: 'Toshkent shahar 1-son ShTTYO',
-      role: 'admin'
-    };
+    const savedSession = localStorage.getItem('lifeid_doctor_session');
+    this.currentDoctor = savedSession ? JSON.parse(savedSession) : null;
   }
 
   async init() {

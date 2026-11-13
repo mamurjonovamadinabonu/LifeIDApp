@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeID — Admin Boshqaruv Paneli & Shifokorlar Nazorati</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #C5192D;
+  --primary-dark: #9E1020;
+  --primary-light: #FDF2F4;
+  --red-border: #F7C6CB;
+  --text: #1A1A1A;
+  --text-2: #666666;
+  --text-3: #999999;
+  --bg: #F8F9FA;
+  --surface: #FFFFFF;
+  --border: #EAEAEA;
+  --success: #1D9E75;
+  --success-light: #E1F5EE;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+
+.admin-container { max-width: 1000px; margin: 0 auto; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 20px 24px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { width: 44px; height: 44px; background: var(--primary); color: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; }
+.brand-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.brand-sub { font-size: 12px; color: var(--text-3); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; text-align: center; }
+.stat-number { font-size: 28px; font-weight: 700; color: var(--primary); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.stat-label { font-size: 12.5px; color: var(--text-3); font-weight: 600; }
+
+.btn-primary { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13.5px; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--primary-light); color: var(--primary); border: 1px solid var(--red-border); padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13.5px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
+th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+th { background: #F4F5F7; font-weight: 600; color: var(--text-2); }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; text-align: left; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.field input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #F4F5F7; font-size: 14px; outline: none; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="admin-container">
+  <div class="admin-header">
+    <div class="brand">
+      <div class="brand-icon">👑</div>
+      <div>
+        <div class="brand-title">LifeID Markaziy Admin Paneli</div>
+        <div class="brand-sub">Tibbiy ma'lumotlar bazasi va shifokorlar nazorati</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn-secondary" onclick="initAdminDashboard()">🔄 Yangilash</button>
+      <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📤 JSON Import</button>
+      <input type="file" id="importFile" style="display:none" accept=".json" onchange="importDataJSON(event)" />
+      <button class="btn-secondary" onclick="exportDataJSON()">📥 Baza eksporti</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="statPatients">0</div>
+      <div class="stat-label">Jami Bemorlar</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="statDonors">0</div>
+      <div class="stat-label">Faol Donorlar</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="statDoctors">0</div>
+      <div class="stat-label">Ruxsat Etilgan Shifokorlar</div>
+    </div>
+  </div>
+
+  <!-- DOCTOR MANAGEMENT CARD -->
+  <div class="card">
+    <div class="card-title">👨‍⚕️ Ruxsat Etilgan Shifokorlar Ro'yxati & Qo'shish</div>
+    <div style="background:var(--primary-light); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--red-border);">
+      <div style="font-size:13.5px; font-weight:700; color:var(--primary-dark); margin-bottom:10px;">+ Yangi Shifokor Ruxsatini Qo'shish</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;"><label>Shifokor F.I.O.</label><input type="text" id="newDocName" placeholder="Dr. Anvar Sobirov" /></div>
+        <div class="field" style="margin-bottom:0;"><label>Mutaxassislik</label><input type="text" id="newDocSpec" placeholder="Jarroh • Reanimatolog" /></div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;"><label>Shifoxona</label><input type="text" id="newDocClinic" placeholder="2-son shahar shifoxonasi" /></div>
+        <div class="field" style="margin-bottom:0;"><label>PIN Kod (Parol)</label><input type="text" id="newDocPin" placeholder="1234" maxlength="6" style="font-family:'DM Mono'" /></div>
+      </div>
+      <button class="btn-primary" onclick="addNewDoctor()">Shifokorga ruxsat berish ✓</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Shifokor F.I.O.</th>
+            <th>Mutaxassisligi</th>
+            <th>Shifoxona</th>
+            <th>PIN Kod</th>
+            <th>Amal</th>
+          </tr>
+        </thead>
+        <tbody id="adminDoctorsTable">
+          <!-- Dynamically loaded -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Bemorlar Ro'yxati & Tibbiy Kartalar</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>F.I.O.</th>
+            <th>Pasport / JSHSHIR</th>
+            <th>Qon guruhi</th>
+            <th>Qon bosimi</th>
+            <th>Allergiyalar & Tashxislar</th>
+            <th>Skaner ID</th>
+          </tr>
+        </thead>
+        <tbody id="adminPatientsTable">
+          <!-- Dynamically loaded -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  initAdminDashboard();
+});
+
+function initAdminDashboard() {
+  try {
+    const patients = JSON.parse(localStorage.getItem('lifeid_shared_patients') || '[]');
+    const donors = patients.filter(p => p.isDonor);
+
+    let doctors = JSON.parse(localStorage.getItem('lifeid_authorized_doctors') || '[]');
+    if (doctors.length === 0) {
+      doctors = [
+        { id: 'doc_1', name: 'Dr. Jasur Karimov', spec: 'Kardiolog • Reanimatolog', clinic: 'Toshkent shahar 1-son ShTTYO', pin: '7777' },
+        { id: 'doc_2', name: 'Dr. Malika Umarova', spec: 'Terapevt • Gematolog', clinic: 'Respublika Qon Markazi', pin: '1234' }
+      ];
+      localStorage.setItem('lifeid_authorized_doctors', JSON.stringify(doctors));
+    }
+
+    document.getElementById('statPatients').textContent = patients.length;
+    document.getElementById('statDonors').textContent = donors.length;
+    document.getElementById('statDoctors').textContent = doctors.length;
+
+    renderDoctorsTable(doctors);
+    renderPatientsTable(patients);
+  } catch (err) {
+    console.error('Admin dashboard init error:', err);
+  }
+}
+
+function renderDoctorsTable(doctors) {
+  const tbody = document.getElementById('adminDoctorsTable');
+  tbody.innerHTML = '';
+  if (doctors.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Ruxsat etilgan shifokorlar mavjud emas.</td></tr>';
+    return;
+  }
+  doctors.forEach((doc, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><b>${doc.name}</b></td>
+      <td>${doc.spec}</td>
+      <td>${doc.clinic}</td>
+      <td><span style="font-family:'DM Mono'; font-weight:700;">${doc.pin}</span></td>
+      <td><button class="btn-secondary" style="padding:4px 10px; font-size:12px; color:var(--primary); border-color:var(--red-border);" onclick="removeDoctor(${index})">O'chirish</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addNewDoctor() {
+  const name = document.getElementById('newDocName').value.trim();
+  const spec = document.getElementById('newDocSpec').value.trim();
+  const clinic = document.getElementById('newDocClinic'].value.trim();
+  const pin = document.getElementById('newDocPin').value.trim();
+
+  if (!name || !spec || !clinic || !pin) {
+    alert("Iltimos, shifokorning barcha ma'lumotlarini to'ldiring!");
+    return;
+  }
+
+  let doctors = JSON.parse(localStorage.getItem('lifeid_authorized_doctors') || '[]');
+  doctors.push({ id: 'doc_' + Date.now(), name, spec, clinic, pin });
+  localStorage.setItem('lifeid_authorized_doctors', JSON.stringify(doctors));
+
+  document.getElementById('newDocName').value = '';
+  document.getElementById('newDocSpec').value = '';
+  document.getElementById('newDocClinic').value = '';
+  document.getElementById('newDocPin').value = '';
+
+  renderDoctorsTable(doctors);
+  document.getElementById('statDoctors').textContent = doctors.length;
+  alert("Yangi shifokor muvaffaqiyatli ro'yxatga olindi va tizimga kirish huquqini oldi!");
+}
+
+function removeDoctor(index) {
+  let doctors = JSON.parse(localStorage.getItem('lifeid_authorized_doctors') || '[]');
+  doctors.splice(index, 1);
+  localStorage.setItem('lifeid_authorized_doctors', JSON.stringify(doctors));
+  renderDoctorsTable(doctors);
+  document.getElementById('statDoctors').textContent = doctors.length;
+}
+
+function renderPatientsTable(patients) {
+  const tbody = document.getElementById('adminPatientsTable');
+  tbody.innerHTML = '';
+  if (patients.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Bemorlar mavjud emas. (Ilovadan ma'lumotlarni yuklash uchun JSON Import tugmasini bosing).</td></tr>';
+    return;
+  }
+  patients.forEach(p => {
+    const tr = document.createElement('tr');
+    const diagnosesText = p.diagnoses ? p.diagnoses.join('; ') : (p.chronic || 'Yo\'q');
+    tr.innerHTML = `
+      <td><b>${p.lastName} ${p.firstName}</b><br><span style="font-size:11.5px; color:#777;">${p.birthDate || ''}</span></td>
+      <td><span style="font-family:'DM Mono'">${p.passportSeries} ${p.passportNumber}</span><br><span style="font-size:11.5px; font-family:'DM Mono'; color:#777;">${p.jshshir || ''}</span></td>
+      <td><span style="background:#FDF2F4; color:#C5192D; padding:3px 8px; border-radius:12px; font-weight:700; font-family:'DM Mono'">${p.bloodGroup} ${p.rhesus}</span></td>
+      <td>${p.bp || '120/80'}</td>
+      <td>${p.allergies?.join(', ') || 'Yo\'q'}<br><span style="font-size:11.5px; color:var(--primary);"><b>Tashxislar:</b> ${diagnosesText}</span></td>
+      <td><span style="font-family:'DM Mono'; font-size:11.5px; color:#555;">${p.fingerprintId || '-'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function exportDataJSON() {
+  const patients = JSON.parse(localStorage.getItem('lifeid_shared_patients') || '[]');
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(patients, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", "lifeid_admin_patients_backup.json");
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function importDataJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedPatients = JSON.parse(e.target.result);
+      if (Array.isArray(importedPatients)) {
+        localStorage.setItem('lifeid_shared_patients', JSON.stringify(importedPatients));
+        alert("Muvaffaqiyatli! Bemorlar bazasi yuklandi.");
+        initAdminDashboard();
+      } else {
+        alert("Xato: Noto'g'ri JSON formati!");
+      }
+    } catch (err) {
+      alert("Xato: Faylni o'qishda xatolik yuz berdi: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+</script>
+</body>
+</html>
