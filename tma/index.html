@@ -6,6 +6,7 @@
 <title>LifeID — Bemor Portali (Telegram Mini App)</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="../security.js"></script>
 <style>
 :root {
   --primary: #C5192D;
@@ -122,6 +123,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      const u = tg.initDataUnsafe.user;
+      document.getElementById('tgUserName').textContent = (u.first_name || '') + ' ' + (u.last_name || '');
+    }
   }
 });
 
@@ -143,18 +148,31 @@ function sendAiMessage() {
   box.scrollTop = box.scrollHeight;
 
   setTimeout(() => {
-    let reply = `🤖 **AI Tahlili:** "${txt"}" bo'yicha bemorning allergiyalari (Penitsillin) hisobga olindi. Xavfli o'zaro ta'sir aniqlanmadi. Shifokor tavsiyasiga amal qiling.`;
+    const lower = txt.toLowerCase();
+    let reply = "";
+    if (lower.includes('penitsillin') || lower.includes('ampitsillin') || lower.includes('amoksitsillin')) {
+      reply = `⚠️ <b style="color:var(--primary);">DIQQAT! ALLERGIYA XAVFI:</b> Sizning tibbiy kartangizda <b>Penitsillin guruhi</b> antibiotiklariga o'ta xavfli allergiya qayd etilgan! Ushbu preparatni qabul qilish anafilaktik shokka olib kelishi mumkin. Zudlik bilan shifokor bilan maslahatlashing!`;
+    } else if (lower.includes('aspirin') || lower.includes('paratsetamol') || lower.includes('ibuprofen') || lower.includes('analgin')) {
+      reply = `🩺 <b>AI Tahlili:</b> Qayd etilgan preparat (${txt}) bemorning allergiyalari (Penitsillin) bilan to'g'ridan-to'g'ri kesishmaydi. Biroq, oshqozon-ichak va qon ivish ko'rsatkichlarini hisobga olib, faqat shifokor belgilagan dozada qabul qiling.`;
+    } else if (lower.includes('bosim') || lower.includes('davleniye') || lower.includes('yurak')) {
+      reply = `💓 <b>Klinik Tavsiya:</b> Qon bosimingizni o'lchang. Standart me'yor: 120/80 mmHg. Agar bosh aylanishi yoki ko'krakda og'riq kuzatilsa, darhol 103 ga yoki yaqinlaringizga xabar bering.`;
+    } else {
+      reply = `🤖 <b>LifeID AI Agent:</b> "${txt}" bo'yicha so'rovingiz tahlil qilindi. Bemor kartangizdagi ko'rsatkichlar (O (I) Rh+, Astma, Penitsillin allergiyasi) hisobga olindi. Shoshilinch holatlarda ilovadagi ICE kontaktlaridan foydalaning.`;
+    }
     box.innerHTML += `<div class="chat-msg bot">${reply}</div>`;
     box.scrollTop = box.scrollHeight;
-  }, 1000);
+  }, 700);
 }
 
 function addReminder() {
-  const drug = document.getElementById('reminderDrug').value;
-  const time = document.getElementById('reminderTime').value;
-  if (!drug || !time) return;
+  const drug = document.getElementById('reminderDrug').value.trim();
+  const time = document.getElementById('reminderTime').value.trim();
+  if (!drug || !time) {
+    alert("Iltimos, dori nomi va vaqtini kiriting!");
+    return;
+  }
   const list = document.getElementById('reminderList');
-  list.innerHTML += `<div style="background:#F4F5F7; padding:10px; border-radius:8px; display:flex; justify-content:between; align-items:center;"><div><b>${drug}</b> — ${time}</div><span style="color:var(--success); font-size:12px;">Faol</span></div>`;
+  list.innerHTML += `<div style="background:#F4F5F7; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;"><div><b>${drug}</b> — ${time}</div><span style="color:var(--success); font-size:12px; font-weight:600;">Faol ✓</span></div>`;
   document.getElementById('reminderDrug').value = '';
   document.getElementById('reminderTime').value = '';
 }

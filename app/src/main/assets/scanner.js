@@ -1,4 +1,4 @@
-// scanner.js - Biometric Fingerprint Scanner (Android Native BiometricPrompt + Strict Simulation)
+// scanner.js — Biometric Fingerprint Scanner (Android Native BiometricPrompt + Strict Simulation)
 class BiometricScanner {
   async scanFingerprint() {
     // 1. If running in Android App with native BiometricPrompt bridge (Samsung / Android biometrics)

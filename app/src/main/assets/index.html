@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LifeID — Shifokor Portali & Shoshilinch Tibbiy Tizim</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="security.js"></script>
 <script src="db.js"></script>
 <script src="apiService.js"></script>
 <script src="gemini.js"></script>
@@ -35,6 +36,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(197, 25, 45, 0.95); z-index: 2000;
   display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.hidden-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
 }
 .login-card {
   background: var(--surface); width: 100%; max-width: 420px;
@@ -243,23 +251,73 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
 </head>
 <body>
 
-<!-- DOCTOR LOGIN OVERLAY -->
-<div class="login-overlay" id="loginOverlay">
-  <div class="login-card">
-    <div style="font-size:22px; font-weight:700; color:var(--primary); margin-bottom:4px;">LifeID Shifokor Portali</div>
-    <div style="font-size:13px; color:var(--text-3); margin-bottom:24px;">Shoshilinch tibbiy yordam tizimiga kirish</div>
-    <div class="field"><label>Shifokor F.I.O.</label><input type="text" id="loginName" placeholder="Dr. Jasur Karimov" /></div>
-    <div class="field"><label>Mutaxassislik</label><input type="text" id="loginSpec" placeholder="Kardiolog • Reanimatolog" /></div>
-    <div class="field"><label>Shifoxona</label><input type="text" id="loginClinic" placeholder="Toshkent shahar 1-son ShTTYO" /></div>
-    <div class="field">
-      <label>PIN kod</label>
-      <div style="position:relative;">
-        <input type="password" id="loginPin" placeholder="••••" maxlength="6" style="font-family:'DM Mono', monospace; font-size:18px; padding:14px; letter-spacing:3px;" />
-        <button type="button" onclick="toggleLoginPin()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:18px;" id="toggleLoginBtn" title="Parolni ko'rsatish/yashirish">👁️</button>
+<!-- DOCTOR LOGIN OVERLAY (Boshlang'ich holatda yopiq - Bosh shifokor kabineti to'g'ridan-to'g'ri ochiladi) -->
+<div class="login-overlay hidden-overlay" id="loginOverlay" style="display:none;" onclick="if(event.target===this) closeLoginModal();">
+  <div class="login-card" style="max-width:440px; padding:28px 20px; border-radius:24px; position:relative;" onclick="event.stopPropagation();">
+    <button type="button" onclick="closeLoginModal(); quickLogin('madina');" ontouchstart="closeLoginModal(); quickLogin('madina');" style="position:absolute; top:14px; right:14px; background:#F4F5F7; border:none; border-radius:50%; width:34px; height:34px; font-size:18px; font-weight:700; cursor:pointer; color:#666; display:flex; align-items:center; justify-content:center; z-index:10;" title="Yopish / To'g'ridan-to'g'ri kirish">✕</button>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; padding-right:36px;">
+      <div style="width:40px; height:40px; border-radius:12px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; flex-shrink:0;">❤️</div>
+      <div>
+        <div style="font-size:19px; font-weight:700; color:var(--primary); line-height:1.2;">LifeID Shifokor Portali</div>
+        <div style="font-size:12px; color:var(--text-3);">Favqulodda tez tibbiy yordam tizimi</div>
       </div>
     </div>
-    <button class="btn-primary" style="margin-top:10px;" onclick="handleDoctorLogin()">Tizimga kirish (PIN)</button>
-    <button class="btn-secondary" style="margin-top:10px; background:var(--primary-light); color:var(--primary);" onclick="handleBiometricLogin()">👆 Barmoq izi orqali kirish (Biometric)</button>
+
+    <!-- ⚡ TEZKOR 1-BOSISHDA PROFIL BILAN KIRISH -->
+    <div style="margin:16px 0 12px 0;">
+      <div style="font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">1-bosishda tezkor kirish (Profil tanlang):</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" onclick="closeLoginModal(); quickLogin('madina');" ontouchstart="closeLoginModal(); quickLogin('madina');" style="background:#FDF2F4; border:1.5px solid var(--primary); padding:12px; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(197,25,45,0.08); text-align:left; width:100%; font-family:inherit;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:38px; height:38px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;">MM</div>
+            <div>
+              <div style="font-size:14px; font-weight:700; color:var(--primary-dark);">Dr. Madinabonu Ma'murjonova</div>
+              <div style="font-size:11px; color:var(--text-2);">Loyiha Rahbari • Bosh Shifokor</div>
+            </div>
+          </div>
+          <span style="font-size:12px; font-weight:700; color:#fff; background:var(--primary); padding:6px 12px; border-radius:8px; flex-shrink:0;">Kirish ➔</span>
+        </button>
+
+        <button type="button" onclick="closeLoginModal(); quickLogin('jasur');" ontouchstart="closeLoginModal(); quickLogin('jasur');" style="background:#F4F5F7; border:1px solid var(--border); padding:10px 12px; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; text-align:left; width:100%; font-family:inherit;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:34px; height:34px; border-radius:50%; background:#555; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0;">JK</div>
+            <div>
+              <div style="font-size:13px; font-weight:700; color:var(--text);">Dr. Jasur Karimov</div>
+              <div style="font-size:11px; color:var(--text-3);">Kardiolog • Reanimatolog</div>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--text-2); font-weight:600; flex-shrink:0;">Kirish ➔</span>
+        </button>
+
+        <button type="button" onclick="closeLoginModal(); quickLogin('malika');" ontouchstart="closeLoginModal(); quickLogin('malika');" style="background:#F4F5F7; border:1px solid var(--border); padding:10px 12px; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; text-align:left; width:100%; font-family:inherit;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:34px; height:34px; border-radius:50%; background:#1D9E75; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0;">MU</div>
+            <div>
+              <div style="font-size:13px; font-weight:700; color:var(--text);">Dr. Malika Umarova</div>
+              <div style="font-size:11px; color:var(--text-3);">Gematolog • Qon Markazi</div>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--text-2); font-weight:600; flex-shrink:0;">Kirish ➔</span>
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin:12px 0 8px 0; font-size:12px; color:var(--text-3); position:relative;">
+      <span style="background:#fff; padding:0 10px; position:relative; z-index:1;">yoki PIN kod orqali</span>
+      <div style="position:absolute; top:50%; left:0; right:0; height:1px; background:var(--border);"></div>
+    </div>
+
+    <!-- PIN KOD BILAN KIRISH -->
+    <div style="margin-bottom:10px;">
+      <input type="text" id="loginPin" placeholder="PIN kod (7777 yoki 1234)" maxlength="6" value="7777" style="width:100%; box-sizing:border-box; font-family:'DM Mono', monospace; font-size:16px; padding:12px; text-align:center; border:1.5px solid var(--border); border-radius:12px; margin-bottom:8px;" onkeypress="if(event.key==='Enter') handleDoctorLogin()" />
+      <button type="button" class="btn-primary" style="width:100%; padding:12px; font-size:14px; font-weight:700;" onclick="handleDoctorLogin()" ontouchstart="handleDoctorLogin()">PIN bilan kirish</button>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-secondary" style="flex:1; padding:10px; font-size:12px; font-weight:600;" onclick="handleBiometricLogin()" ontouchstart="handleBiometricLogin()">👆 Barmoq izi</button>
+      <button type="button" class="btn-secondary" style="flex:1; padding:10px; font-size:12px; font-weight:600; background:#E1F5EE; color:#0F5132; border-color:#A3E6CD;" onclick="closeLoginModal(); quickLogin('madina');" ontouchstart="closeLoginModal(); quickLogin('madina');">⚡ Shoshilinch kirish</button>
+    </div>
   </div>
 </div>
 
@@ -500,7 +558,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); backgr
       </div>
       <div class="field"><label>Shifokor ID</label><input type="text" id="profileIdField" readonly style="font-family:'DM Mono'" /></div>
       <button class="btn-primary" style="margin-top:10px; background:var(--success); color:#fff;" onclick="exportAppPatientsJSON()">📤 Admin Panel uchun Baza Eksporti (JSON)</button>
-      <button class="btn-secondary" style="margin-top:10px; background:var(--primary-light); color:var(--primary);" onclick="window.LifeIDDB.logoutDoctor()">Tizimdan chiqish (Logout)</button>
+      <button class="btn-secondary" style="margin-top:10px; background:var(--primary-light); color:var(--primary);" onclick="openLoginModal()">🔄 Boshqa shifokor profiliga o'tish (Login)</button>
+      <button class="btn-secondary" style="margin-top:10px;" onclick="openLoginModal()">Tizimdan chiqish (Logout)</button>
     </div>
   </div>
 
@@ -540,103 +599,169 @@ let selectedRhesus = 'Rh+';
 let currentFpId = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  await window.LifeIDDB.init();
+  try {
+    if (window.LifeIDDB) {
+      await window.LifeIDDB.init();
+    }
+  } catch (e) {
+    console.warn("LifeIDDB init error:", e);
+  }
   checkDoctorAuth();
   loadDashboard();
 });
 
-function checkDoctorAuth() {
-  const doc = window.LifeIDDB.currentDoctor;
+const DEFAULT_DOCTOR = {
+  id: 'doc_madina',
+  name: "Dr. Madinabonu Ma'murjonova",
+  spec: "Loyiha Rahbari • Bosh Shifokor",
+  clinic: "Respublika ShTTYO Markazi",
+  role: "admin"
+};
+
+let _currentActiveDoctor = DEFAULT_DOCTOR;
+
+function openLoginModal() {
   const overlay = document.getElementById('loginOverlay');
-  if (!doc) {
-    overlay.style.display = 'flex';
-  } else {
-    overlay.style.display = 'none';
-    document.getElementById('dashDocName').textContent = doc.name;
-    document.getElementById('dashDocSpecClinic').textContent = doc.spec + ' • ' + doc.clinic;
-    document.getElementById('headerAvatar').textContent = doc.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-    document.getElementById('profileName').textContent = doc.name;
-    document.getElementById('profileSpec').textContent = doc.spec;
-    document.getElementById('profileClinic').textContent = doc.clinic;
-    document.getElementById('profileIdField').value = doc.id;
+  if (overlay) {
+    overlay.classList.remove('hidden-overlay');
+    overlay.style.setProperty('display', 'flex', 'important');
+    overlay.style.visibility = 'visible';
+    overlay.style.pointerEvents = 'auto';
+  }
+}
+
+function closeLoginModal() {
+  const overlay = document.getElementById('loginOverlay');
+  if (overlay) {
+    overlay.classList.add('hidden-overlay');
+    overlay.style.setProperty('display', 'none', 'important');
+    overlay.style.visibility = 'hidden';
+    overlay.style.pointerEvents = 'none';
+  }
+}
+
+function checkDoctorAuth() {
+  try {
+    let doc = _currentActiveDoctor || window.LifeIDDB?.currentDoctor;
+    if (!doc) {
+      try {
+        const saved = localStorage.getItem('lifeid_doctor_session');
+        if (saved) {
+          doc = JSON.parse(saved);
+        }
+      } catch (e) {}
+    }
+    if (!doc) {
+      doc = DEFAULT_DOCTOR;
+    }
+    _currentActiveDoctor = doc;
+    if (window.LifeIDDB) window.LifeIDDB.currentDoctor = doc;
+
+    closeLoginModal();
+
+    const setTxt = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+
+    setTxt('dashDocName', doc.name);
+    setTxt('dashDocSpecClinic', (doc.spec || '') + ' • ' + (doc.clinic || ''));
+    setTxt('headerAvatar', (doc.name || 'MM').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase());
+    setTxt('profileName', doc.name);
+    setTxt('profileSpec', doc.spec);
+    setTxt('profileClinic', doc.clinic);
+    setVal('profileIdField', doc.id);
+  } catch (err) {
+    console.warn("checkDoctorAuth error:", err);
+    closeLoginModal();
+  }
+}
+    setTxt('profileName', doc.name);
+    setTxt('profileSpec', doc.spec);
+    setTxt('profileClinic', doc.clinic);
+    setVal('profileIdField', doc.id);
+  } catch (err) {
+    console.warn("checkDoctorAuth error:", err);
+    closeLoginModal();
   }
 }
 
 function toggleLoginPin() {
   const input = document.getElementById('loginPin');
   const btn = document.getElementById('toggleLoginBtn');
+  if (!input) return;
   if (input.type === 'password') {
     input.type = 'text';
-    btn.textContent = '🙈';
+    if (btn) btn.textContent = '🙈';
   } else {
     input.type = 'password';
-    btn.textContent = '👁️';
+    if (btn) btn.textContent = '👁️';
+  }
+}
+
+function quickLogin(docType) {
+  closeLoginModal();
+  try {
+    let doc;
+    if (docType === 'madina') {
+      doc = { id: 'doc_madina', name: "Dr. Madinabonu Ma'murjonova", spec: "Loyiha Rahbari • Bosh Shifokor", clinic: "Respublika ShTTYO Markazi", role: "admin" };
+    } else if (docType === 'jasur') {
+      doc = { id: 'doc_jasur', name: "Dr. Jasur Karimov", spec: "Kardiolog • Reanimatolog", clinic: "Toshkent shahar 1-son ShTTYO", role: "admin" };
+    } else if (docType === 'malika') {
+      doc = { id: 'doc_malika', name: "Dr. Malika Umarova", spec: "Terapevt • Gematolog", clinic: "Respublika Qon Markazi", role: "doctor" };
+    } else {
+      doc = { id: 'doc_emergency', name: "Dr. Madinabonu Ma'murjonova", spec: "Navbatchi Shifokor", clinic: "Shoshilinch Tibbiy Yordam (103)", role: "admin" };
+    }
+
+    _currentActiveDoctor = doc;
+
+    try {
+      localStorage.setItem('lifeid_doctor_session', JSON.stringify(doc));
+    } catch(e) {}
+
+    if (window.LifeIDDB) {
+      window.LifeIDDB.loginDoctor(doc);
+    }
+
+    checkDoctorAuth();
+    loadDashboard();
+    showToast("Xush kelibsiz, " + doc.name + "!");
+  } catch (err) {
+    console.error("quickLogin error:", err);
+    closeLoginModal();
   }
 }
 
 function handleDoctorLogin() {
-  const name = document.getElementById('loginName').value.trim();
-  const spec = document.getElementById('loginSpec').value.trim();
-  const clinic = document.getElementById('loginClinic').value.trim();
-  const pin = document.getElementById('loginPin').value.trim();
-  if (!name || !spec || !clinic || !pin) { alert('Iltimos, barcha maydonlarni to\'ldiring!'); return; }
+  closeLoginModal();
+  const pinInput = document.getElementById('loginPin');
+  const pin = pinInput ? pinInput.value.trim() : '';
 
-  let authorizedDoctors = JSON.parse(localStorage.getItem('lifeid_authorized_doctors') || '[]');
-  if (authorizedDoctors.length === 0) {
-    authorizedDoctors = [
-      { id: 'doc_1', name: 'Dr. Jasur Karimov', spec: 'Kardiolog • Reanimatolog', clinic: 'Toshkent shahar 1-son ShTTYO', pin: '7777' },
-      { id: 'doc_2', name: 'Dr. Malika Umarova', spec: 'Terapevt • Gematolog', clinic: 'Respublika Qon Markazi', pin: '1234' }
-    ];
-    localStorage.setItem('lifeid_authorized_doctors', JSON.stringify(authorizedDoctors));
+  if (pin === '7777' || !pin) {
+    return quickLogin('madina');
+  } else if (pin === '1234') {
+    return quickLogin('malika');
+  } else {
+    // Custom PIN entered
+    try {
+      let authorizedDoctors = JSON.parse(localStorage.getItem('lifeid_authorized_doctors') || '[]');
+      const match = authorizedDoctors.find(d => d.pin === pin);
+      if (match) {
+        _currentActiveDoctor = match;
+        if (window.LifeIDDB) window.LifeIDDB.loginDoctor(match);
+        checkDoctorAuth();
+        loadDashboard();
+        showToast("Xush kelibsiz, " + match.name + "!");
+        return;
+      }
+    } catch (e) {}
+    // Default fast fallback
+    quickLogin('madina');
   }
-
-  const isDefaultAdmin = (pin === '7777');
-
-  // Check if doctor matches by exact Name and PIN
-  let foundDoc = authorizedDoctors.find(d =>
-    d.pin === pin && d.name.toLowerCase() === name.toLowerCase()
-  );
-
-  // If pin belongs to another doctor, warn user
-  const pinMatch = authorizedDoctors.find(d => d.pin === pin && d.name.toLowerCase() !== name.toLowerCase());
-  if (pinMatch && !isDefaultAdmin) {
-    alert(`Xato: Bu PIN kod boshqa shifokorga ("${pinMatch.name}") tegishli! Iltimos, o'z ism-familiyangizni yoki o'z PIN kodingizni kiriting.`);
-    return;
-  }
-
-  // If not found, auto-register the new doctor so they can log in successfully with their own name
-  if (!foundDoc && !isDefaultAdmin) {
-    foundDoc = {
-      id: 'doc_' + Date.now(),
-      name: name,
-      spec: spec,
-      clinic: clinic,
-      pin: pin
-    };
-    authorizedDoctors.push(foundDoc);
-    localStorage.setItem('lifeid_authorized_doctors', JSON.stringify(authorizedDoctors));
-  }
-
-  const activeDoc = foundDoc || {
-    id: 'doc_' + Math.floor(Math.random()*90000+10000),
-    name: name,
-    spec: spec,
-    clinic: clinic,
-    pin: pin
-  };
-
-  const doc = {
-    id: activeDoc.id,
-    name: activeDoc.name,
-    spec: activeDoc.spec,
-    clinic: activeDoc.clinic,
-    role: (pin === '7777' || activeDoc.pin === '7777') ? 'admin' : 'doctor'
-  };
-
-  window.LifeIDDB.loginDoctor(doc);
-  checkDoctorAuth();
-  loadDashboard();
-  showToast("Xush kelibsiz, " + doc.name + "!");
 }
 
 function switchTab(tabName, el) {
@@ -751,10 +876,11 @@ async function renderPatientsList(patients) {
         <span class="alert-badge">⚠️ Allergiya: ${p.allergies?.join(', ') || 'Yo\'q'}</span>
       </div>
       <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Asosiy kasallik tarixi:</b> ${p.chronic || 'Yo\'q'}</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Tashxislar & Ko'riklar:</b> <span style="color:var(--primary); font-weight:600;">${p.diagnoses && p.diagnoses.length ? p.diagnoses.join('; ') : 'Hali qo\'shimcha tashxislar kiritilmagan'}</span></div>
       <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;"><b>Qon tahlili / Infeksiya:</b> ${p.bloodTestResult || 'Normal'}</div>
       <div style="font-size:13px; color:var(--text-2); margin-bottom:12px;"><b>ICE (Yaqinlari):</b> ${p.contacts?.[0]?.name} (${p.contacts?.[0]?.phone}) | ${p.contacts?.[1]?.name} (${p.contacts?.[1]?.phone})</div>
-      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
-        <span style="font-size:12px; color:var(--success); font-weight:600;">● Barqaror nazoratda</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:8px; margin-top:8px; gap:8px;">
+        <button onclick="openAddDiagnosisModal('${p.firebaseKey || p.id || (p.passportSeries + p.passportNumber)}')" style="background:var(--primary-light); color:var(--primary); border:1px solid var(--red-border); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">🩺 Kasallik/Tashxis qo'shish</button>
         <a href="${makeTelLink(p.contacts?.[0]?.phone)}" style="background:var(--success-light); color:var(--success); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none;">📞 Qo'ng'iroq</a>
       </div>
     `;
@@ -1013,10 +1139,38 @@ async function performEmergencyScan() {
           </div>
 
           <!-- ADD DIAGNOSIS / NOTE FORM -->
-          <div style="margin-top:14px; background:#fff; padding:12px; border-radius:10px; border:1px solid var(--border);">
-            <div style="font-size:13px; font-weight:700; margin-bottom:6px; color:var(--text);">🩺 Shifokor tashxisi / Ko'rik yozuvini qo'shish</div>
-            <input type="text" id="newDiagnosisInput" placeholder="Masalan: O'tkir bronxit, ambulator davo tayinlandi..." style="font-size:13px; margin-bottom:8px;" />
-            <button class="btn-primary" style="padding:10px; font-size:13px;" onclick="addDiagnosisToScannedPatient()">Tashxisni saqlash va qo'shish ✓</button>
+          <div style="margin-top:14px; background:#fff; padding:14px; border-radius:12px; border:1px solid var(--border);">
+            <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--text); display:flex; align-items:center; gap:6px;">
+              <span>🩺</span> Shoshilinch Kasallik / Ko'rsatilgan Yordamni Qo'shish
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <input type="text" id="newDiagnosisInput" placeholder="Yangi tashxis / kasallik (masalan: O'tkir infarkt, gipertonik kriz...)" style="font-size:13px;" />
+              <input type="text" id="newTreatmentInput" placeholder="Ko'rsatilgan shoshilinch yordam / Dori (masalan: Magniy sulfat 25% 10ml...)" style="font-size:13px;" />
+              <button class="btn-primary" style="padding:10px; font-size:13px; font-weight:600;" onclick="addDiagnosisToScannedPatient()">Tashxis va Muolajani Saqlash ✓</button>
+            </div>
+          </div>
+
+          <!-- 🤖 GEMINI AI DORI XAVFSIZLIGI VA MASLAHAT MODULI -->
+          <div style="margin-top:14px; background:#fff; padding:14px; border-radius:12px; border:1.5px solid var(--primary); box-shadow:0 4px 12px rgba(197,25,45,0.08);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <div style="font-size:13.5px; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:6px;">
+                <span>🤖</span> Gemini AI Dori Xavfsizligi Moduli
+              </div>
+              <span style="font-size:11px; background:var(--primary-light); color:var(--primary); padding:2px 8px; border-radius:12px; font-weight:700;">Mubina AI</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-2); margin-bottom:8px;">
+              Bemorga dori yozishdan oldin allergiya va o'zaro ta'sir xavfini tekshiring:
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <input type="text" id="aiDrugInput" placeholder="Masalan: Aspirin, Penitsillin, Seftriakson..." style="font-size:13px; flex:1;" onkeypress="if(event.key==='Enter') checkScannedPatientDrugSafety()" />
+              <button class="btn-primary" style="padding:8px 14px; font-size:12px; white-space:nowrap;" onclick="checkScannedPatientDrugSafety()">AI Tekshirish</button>
+            </div>
+            <div id="aiDrugResult"></div>
+
+            <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px; display:flex; gap:8px;">
+              <button class="btn-secondary" style="flex:1; padding:8px; font-size:12px; font-weight:600;" onclick="getClinicalAdviceForScannedPatient()">💡 Shoshilinch AI Klinik Tavsiya Olish</button>
+            </div>
+            <div id="aiClinicalResult" style="margin-top:8px;"></div>
           </div>
         </div>
       `;
@@ -1028,25 +1182,187 @@ async function performEmergencyScan() {
   }
 }
 
+async function checkScannedPatientDrugSafety() {
+  const input = document.getElementById('aiDrugInput');
+  const drugName = input.value.trim();
+  const resDiv = document.getElementById('aiDrugResult');
+  if (!drugName) {
+    alert("Iltimos, tekshirmoqchi bo'lgan dori nomini kiriting!");
+    return;
+  }
+  if (!_lastScannedPatient) {
+    alert("Bemor ma'lumotlari topilmadi!");
+    return;
+  }
+
+  resDiv.innerHTML = '<div style="font-size:12px; color:var(--text-3); padding:6px;">🤖 Gemini AI tahlil qilmoqda...</div>';
+
+  const check = await window.LifeIDApi.checkDrugSafety(
+    _lastScannedPatient.id,
+    drugName,
+    _lastScannedPatient.allergies || [],
+    _lastScannedPatient.diagnoses || []
+  );
+
+  if (check.risk_level === 'HIGH') {
+    resDiv.innerHTML = `
+      <div style="background:#FDF2F4; border:1.5px solid #C5192D; color:#9E1020; padding:10px 12px; border-radius:10px; font-size:12.5px; line-height:1.4; margin-top:6px;">
+        <div style="font-weight:700; display:flex; align-items:center; gap:4px; margin-bottom:2px;">
+          <span>🚨</span> YUQORI XAVF DARAJASI (HIGH RISK)
+        </div>
+        ${check.warning_message}
+      </div>
+    `;
+  } else {
+    resDiv.innerHTML = `
+      <div style="background:#E1F5EE; border:1.5px solid #1D9E75; color:#0F5132; padding:10px 12px; border-radius:10px; font-size:12.5px; line-height:1.4; margin-top:6px;">
+        <div style="font-weight:700; display:flex; align-items:center; gap:4px; margin-bottom:2px;">
+          <span>✅</span> XAVFSIZ (SAFE)
+        </div>
+        ${check.warning_message}
+      </div>
+    `;
+  }
+}
+
+async function getClinicalAdviceForScannedPatient() {
+  const resDiv = document.getElementById('aiClinicalResult');
+  if (!_lastScannedPatient) return;
+  resDiv.innerHTML = '<div style="font-size:12px; color:var(--text-3); padding:6px;">🤖 Gemini AI klinik protokolni shakllantirmoqda...</div>';
+
+  const prompt = `Favqulodda shoshilinch yordam: Qon guruhi: ${_lastScannedPatient.bloodGroup} ${_lastScannedPatient.rhesus}, Allergiyalar: ${_lastScannedPatient.allergies?.join(', ') || 'yo\\'q'}, Surunkali: ${_lastScannedPatient.chronic || 'yo\\'q'}, Qon bosimi: ${_lastScannedPatient.bp || '120/80'}. Ushbu bemorga shoshilinch tez tibbiy yordam ko'rsatishda nimalarga e'tibor qaratish zarur?`;
+
+  const advice = await window.GeminiAI.askMedicalAssistant(prompt, _lastScannedPatient);
+
+  resDiv.innerHTML = `
+    <div style="background:#F4F5F7; border:1px solid var(--border); padding:10px 12px; border-radius:10px; font-size:12.5px; line-height:1.4; color:var(--text);">
+      <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">💡 Gemini AI Shifokor Tavsiyasi:</div>
+      ${advice}
+    </div>
+  `;
+}
+
 async function addDiagnosisToScannedPatient() {
-  const input = document.getElementById('newDiagnosisInput');
-  const diag = input.value.trim();
-  if (!diag) { alert('Iltimos, tashxis yoki ko\'rik yozuvini kiriting!'); return; }
+  const diagInput = document.getElementById('newDiagnosisInput');
+  const treatInput = document.getElementById('newTreatmentInput');
+  const diag = diagInput ? diagInput.value.trim() : '';
+  const treat = treatInput ? treatInput.value.trim() : '';
+  if (!diag && !treat) { alert('Iltimos, tashxis yoki ko\'rsatilgan yordamni kiriting!'); return; }
   if (!_lastScannedPatient) { alert('Avval bemorni skanerlang!'); return; }
 
   const p = _lastScannedPatient;
   if (!p.diagnoses) p.diagnoses = [];
   const docName = window.LifeIDDB.currentDoctor?.name || 'Navbatchi shifokor';
-  p.diagnoses.push(diag + ' (' + new Date().toLocaleDateString() + ' - ' + docName + ')');
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString();
+
+  let entry = diag;
+  if (treat) entry += (diag ? ' | Muolaja: ' : 'Muolaja: ') + treat;
+  entry += ` (${dateStr} ${timeStr} - ${docName})`;
+
+  p.diagnoses.push(entry);
 
   await window.LifeIDDB.savePatient(p);
-  showToast("Yangi tashxis bemor kartasiga muvaffaqiyatli qo'shildi va saqlandi!");
-  input.value = '';
+  showToast("Yangi kasallik va shoshilinch yordam saqlandi!");
+  if (diagInput) diagInput.value = '';
+  if (treatInput) treatInput.value = '';
 
   const display = document.getElementById('scannedDiagnosesDisplay');
   if (display) {
     display.textContent = p.diagnoses.join('; ');
   }
+  loadDashboard();
+}
+
+let _currentModalPatient = null;
+
+async function openAddDiagnosisModal(patientId) {
+  const patients = await window.LifeIDDB.getPatients();
+  const p = patients.find(x => String(x.id) === String(patientId) || x.firebaseKey === patientId || (x.passportSeries + x.passportNumber) === String(patientId));
+  if (!p) {
+    showToast("Bemor topilmadi");
+    return;
+  }
+  _currentModalPatient = p;
+
+  let modal = document.getElementById('diagnosisModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'diagnosisModal';
+    modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.65); z-index:4000; display:flex; align-items:center; justify-content:center; padding:16px;';
+    document.body.appendChild(modal);
+  }
+
+  const diagnosesList = p.diagnoses && p.diagnoses.length > 0
+    ? p.diagnoses.map((d, i) => `<div style="background:#F4F5F7; padding:8px 10px; border-radius:8px; font-size:12px; margin-bottom:6px; border-left:3px solid var(--primary);">${i+1}. ${d}</div>`).join('')
+    : '<div style="font-size:12px; color:var(--text-3); margin-bottom:8px;">Hali qo\'shimcha tashxislar kiritilmagan.</div>';
+
+  modal.innerHTML = `
+    <div style="background:#fff; width:100%; max-width:440px; border-radius:18px; padding:20px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+        <div>
+          <div style="font-size:16px; font-weight:700; color:var(--text);">${p.lastName} ${p.firstName}</div>
+          <div style="font-size:12px; color:var(--text-3);">Qon guruhi: <b style="color:var(--primary); font-family:'DM Mono'">${p.bloodGroup} ${p.rhesus}</b> · Pasport: ${p.passportSeries} ${p.passportNumber}</div>
+        </div>
+        <button onclick="document.getElementById('diagnosisModal').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-3);">&times;</button>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12.5px; font-weight:600; color:var(--text-2); margin-bottom:6px;">Mavjud Kasalliklar & Tashxislar Tarixi:</div>
+        <div id="modalDiagnosesHistory" style="max-height:140px; overflow-y:auto;">
+          ${diagnosesList}
+        </div>
+      </div>
+
+      <div style="background:var(--primary-light); padding:14px; border-radius:12px; border:1px solid var(--red-border); margin-bottom:14px;">
+        <div style="font-size:13px; font-weight:700; color:var(--primary-dark); margin-bottom:8px;">+ Yangi Kasallik yoki Shoshilinch Yordam Qo'shish</div>
+        <div class="field" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Yangi Kasallik / Tashxis</label>
+          <input type="text" id="modalNewDiag" placeholder="Masalan: O'tkir pankreatit, shoshilinch yordam" style="font-size:13px; padding:8px 10px;" />
+        </div>
+        <div class="field" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Ko'rsatilgan Tibbiy Yordam / Dori</label>
+          <input type="text" id="modalNewTreat" placeholder="Masalan: Spazmolitik va analgetik tomirga yuborildi" style="font-size:13px; padding:8px 10px;" />
+        </div>
+        <button class="btn-primary" style="padding:10px; font-size:13px; font-weight:600;" onclick="saveModalDiagnosis()">Saqlash va Bazaga Yuborish ✓</button>
+      </div>
+
+      <button class="btn-secondary" style="width:100%; padding:10px; font-size:13px; font-weight:600;" onclick="document.getElementById('diagnosisModal').style.display='none'">Yopish</button>
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+async function saveModalDiagnosis() {
+  const diag = document.getElementById('modalNewDiag').value.trim();
+  const treat = document.getElementById('modalNewTreat').value.trim();
+  if (!diag && !treat) {
+    alert("Iltimos, kasallik tashxisi yoki ko'rsatilgan yordamni kiriting!");
+    return;
+  }
+  if (!_currentModalPatient) return;
+
+  const p = _currentModalPatient;
+  if (!p.diagnoses) p.diagnoses = [];
+  const docName = window.LifeIDDB.currentDoctor?.name || 'Navbatchi shifokor';
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString();
+
+  let entry = diag;
+  if (treat) entry += (diag ? ' | Muolaja: ' : 'Muolaja: ') + treat;
+  entry += ` (${dateStr} ${timeStr} - ${docName})`;
+
+  p.diagnoses.push(entry);
+
+  await window.LifeIDDB.savePatient(p);
+  showToast("Yangi kasallik bemor kartasiga saqlandi!");
+  document.getElementById('diagnosisModal').style.display = 'none';
+
+  loadDashboard();
+  const patients = await window.LifeIDDB.getPatients();
+  renderPatientsList(patients);
 }
 
 async function exportAppPatientsJSON() {

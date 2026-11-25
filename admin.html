@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LifeID — Admin Boshqaruv Paneli & Shifokorlar Nazorati</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="security.js"></script>
+<script src="db.js"></script>
+<script src="apiService.js"></script>
 <style>
 :root {
   --primary: #C5192D;
@@ -142,13 +145,31 @@ th { background: #F4F5F7; font-weight: 600; color: var(--text-2); }
 </div>
 
 <script>
+const FIREBASE_DB_URL = "https://lifeid-doctor-default-rtdb.firebaseio.com";
+
 window.addEventListener('DOMContentLoaded', () => {
   initAdminDashboard();
 });
 
-function initAdminDashboard() {
+async function initAdminDashboard() {
   try {
-    const patients = JSON.parse(localStorage.getItem('lifeid_shared_patients') || '[]');
+    let patients = [];
+    if (window.LifeIDDB) {
+      try {
+        await window.LifeIDDB.init();
+        patients = await window.LifeIDDB.getPatients();
+      } catch (dbErr) {
+        console.warn("DB init in admin:", dbErr);
+      }
+    }
+
+    if (!patients || patients.length === 0) {
+      patients = JSON.parse(localStorage.getItem('lifeid_shared_patients') || '[]');
+      if (window.MedicalSecurity && Array.isArray(patients)) {
+        patients = await Promise.all(patients.map(p => window.MedicalSecurity.decryptPatientRecord(p)));
+      }
+    }
+
     const donors = patients.filter(p => p.isDonor);
 
     let doctors = JSON.parse(localStorage.getItem('lifeid_authorized_doctors') || '[]');
@@ -194,7 +215,7 @@ function renderDoctorsTable(doctors) {
 function addNewDoctor() {
   const name = document.getElementById('newDocName').value.trim();
   const spec = document.getElementById('newDocSpec').value.trim();
-  const clinic = document.getElementById('newDocClinic'].value.trim();
+  const clinic = document.getElementById('newDocClinic').value.trim();
   const pin = document.getElementById('newDocPin').value.trim();
 
   if (!name || !spec || !clinic || !pin) {

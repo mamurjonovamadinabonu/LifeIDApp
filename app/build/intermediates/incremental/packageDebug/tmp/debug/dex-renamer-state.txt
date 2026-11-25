@@ -1,4 +1,4 @@
-#Fri Nov 13 11:28:18 UZT 2026
+#Thu Nov 19 11:53:42 UZT 2026
 base.2=C\:\\Users\\Starsa\\Downloads\\hisobot\\life_id-main\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
 path.2=1/classes.dex
 base.1=C\:\\Users\\Starsa\\Downloads\\hisobot\\life_id-main\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex

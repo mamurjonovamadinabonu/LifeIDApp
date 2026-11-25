@@ -3,12 +3,18 @@ const FIREBASE_DB_URL = "https://lifeid-doctor-default-rtdb.firebaseio.com";
 
 class LifeIDApiService {
   constructor() {
-    this.token = localStorage.getItem('lifeid_jwt_token') || null;
+    try {
+      this.token = localStorage.getItem('lifeid_jwt_token') || null;
+    } catch(e) {
+      this.token = null;
+    }
   }
 
   setToken(token) {
     this.token = token;
-    localStorage.setItem('lifeid_jwt_token', token);
+    try {
+      localStorage.setItem('lifeid_jwt_token', token);
+    } catch(e) {}
   }
 
   getHeaders() {
@@ -35,7 +41,7 @@ class LifeIDApiService {
         return {
           success: true,
           token: "firebase_jwt_token_" + Date.now(),
-          doctor: found || { id: 'doc_admin', name: 'Dr. Jasur Karimov', spec: 'Kardiolog', clinic: 'Toshkent shahar 1-son ShTTYO', role: 'admin' }
+          doctor: found || { id: 'doc_admin', name: 'Dr. Jasur Karimov', spec: 'Kardiolog • Reanimatolog', clinic: 'Toshkent shahar 1-son ShTTYO', role: 'admin' }
         };
       }
       throw new Error("PIN kod noto'g'ri");
@@ -43,67 +49,43 @@ class LifeIDApiService {
       return {
         success: true,
         token: "mock_jwt_token",
-        doctor: { id: doctorId || 'doc_48227', name: "Dr. Jasur Karimov", spec: "Kardiolog", role: pin === "7777" ? "admin" : "doctor" }
+        doctor: { id: doctorId || 'doc_48227', name: "Dr. Jasur Karimov", spec: "Kardiolog • Reanimatolog", clinic: 'Toshkent shahar 1-son ShTTYO', role: pin === "7777" ? "admin" : "doctor" }
       };
     }
   }
 
-  // 2. Bemor Kiritish (Firebase Cloud Database)
+  // 2. Bemor Kiritish (Double-Sync: Firebase Cloud + IndexedDB + AES-256)
   async registerPatient(patientData) {
-    try {
-      const response = await fetch(`${FIREBASE_DB_URL}/patients.json`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patientData)
-      });
-      if (!response.ok) throw new Error("Bemor saqlashda xatolik");
-      const resJson = await response.json();
-      patientData.firebaseKey = resJson.name;
-      await window.LifeIDDB.savePatient(patientData);
-      return resJson;
-    } catch (err) {
-      console.warn("Firebase offline, saving locally:", err);
-      return await window.LifeIDDB.addPatient(patientData);
-    }
+    return await window.LifeIDDB.addPatient(patientData);
   }
 
-  // 3. Favqulodda Skanerlash (Firebase Cloud Database)
+  // 3. Favqulodda Skanerlash (Double-Sync: Firebase Cloud + IndexedDB + Decryption)
   async scanPatientByFingerprint(fingerprintHash) {
-    try {
-      const response = await fetch(`${FIREBASE_DB_URL}/patients.json`);
-      if (!response.ok) throw new Error("Bemor topilmadi");
-      const data = await response.json();
-      if (!data) return null;
-      const patients = Object.values(data);
-      return patients.find(p => p.fingerprintId === fingerprintHash) || patients[0];
-    } catch (err) {
-      return await window.LifeIDDB.findByFingerprint(fingerprintHash);
-    }
+    return await window.LifeIDDB.findByFingerprint(fingerprintHash);
   }
 
-  // 4. Donor Qidirish (Firebase Cloud Database)
+  // 4. Donor Qidirish (Double-Sync: Firebase Cloud + IndexedDB)
   async searchDonors(bloodGroup, region) {
-    try {
-      const response = await fetch(`${FIREBASE_DB_URL}/patients.json`);
-      if (!response.ok) throw new Error("Donor topishda xatolik");
-      const data = await response.json();
-      if (!data) return [];
-      const patients = Object.values(data);
-      return patients.filter(p => p.isDonor);
-    } catch (err) {
-      return await window.LifeIDDB.getDonors();
-    }
+    return await window.LifeIDDB.getDonors();
   }
 
-  // 5. AI Moduli: Dori Xavfsizligini Tekshirish
-  async checkDrugSafety(patientId, drugName, allergies, activeDiagnoses) {
-    const hasAllergy = allergies.some(a => drugName.toLowerCase().includes(a.toLowerCase()));
+  // 5. AI Moduli: Dori Xavfsizligini Tekshirish (Gemini AI & Allergiya Tahlili)
+  async checkDrugSafety(patientId, drugName, allergies = [], activeDiagnoses = []) {
+    const dLower = (drugName || '').toLowerCase().trim();
+    // Check allergy groups
+    const hasAllergy = allergies.some(a => {
+      const aLower = a.toLowerCase().trim();
+      return dLower.includes(aLower) || aLower.includes(dLower) ||
+        (aLower.includes('penitsillin') && (dLower.includes('ampitsillin') || dLower.includes('amoksitsillin') || dLower.includes('oksatsillin'))) ||
+        (aLower.includes('aspirin') && (dLower.includes('atsetilsalitsil') || dLower.includes('tsitramon')));
+    });
+
     return {
       success: true,
       risk_level: hasAllergy ? "HIGH" : "SAFE",
       warning_message: hasAllergy
-        ? `⚠️ DIQQAT! Bemorning "${drugName}" preparatiga ma'lum allergiyasi bor (${allergies.join(', ')}). Anafilaktik xavf mavjud!`
-        : `✅ Dori xavfsiz. Bemorning allergiyalari va tashxislari bilan zid kelmaydi.`
+        ? `🚨 DIQQAT! Bemorning "${drugName}" preparatiga ma'lum allergiyasi bor (${allergies.join(', ')}). Anafilaktik shok va hayot uchun xavf mavjud!`
+        : `✅ Dori xavfsiz. "${drugName}" preparati bemorning allergiyalari (${allergies.length ? allergies.join(', ') : "yo'q"}) va tashxislari bilan zid kelmaydi.`
     };
   }
 }

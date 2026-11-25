@@ -1,40 +1,41 @@
-// scanner.js - Biometric Fingerprint Scanner (WebAuthn + Simulator)
+// scanner.js — Biometric Fingerprint Scanner (Android Native BiometricPrompt + Strict Simulation)
 class BiometricScanner {
   async scanFingerprint() {
-    if (window.PublicKeyCredential && window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
-      const available = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      if (available) {
-        try {
-          const challenge = new Uint8Array(32);
-          window.crypto.getRandomValues(challenge);
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge: challenge,
-              rp: { name: "LifeID Medical Portal", id: window.location.hostname },
-              user: {
-                id: Uint8Array.from("LifeIDPatient", c => c.charCodeAt(0)),
-                name: "patient@lifeid.uz",
-                displayName: "LifeID Bemor"
-              },
-              pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-              authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
-              timeout: 60000
-            }
-          });
-          if (credential) {
-            return { success: true, fpId: 'fp_auth_' + Math.random().toString(36).substring(2, 9) };
+    // 1. If running in Android App with native BiometricPrompt bridge (Samsung / Android biometrics)
+    if (window.AndroidBio && typeof window.AndroidBio.requestBiometricScan === 'function') {
+      return new Promise((resolve) => {
+        const callbackId = 'bio_' + Math.random().toString(36).substring(2, 9);
+
+        window.onBiometricSuccess = (id, fpId) => {
+          if (id === callbackId) {
+            resolve({ success: true, fpId: fpId });
           }
+        };
+
+        window.onBiometricError = (id, err) => {
+          if (id === callbackId) {
+            console.warn('Biometric authentication error/cancelled:', err);
+            resolve({ success: false, error: err });
+          }
+        };
+
+        try {
+          window.AndroidBio.requestBiometricScan(callbackId);
         } catch (e) {
-          console.log('WebAuthn cancelled or fallback used:', e);
+          resolve({ success: false, error: e.message });
         }
-      }
+      });
     }
 
+    // 2. Browser / Simulator mode: Require explicit confirmation (NO silent auto-success!)
     return new Promise((resolve) => {
-      setTimeout(() => {
+      const confirmed = confirm("🛡️ LifeID Biometrik Skaner:\nBarmoq izi skanerlansinmi? (OK - Barmoqni bosish/Tasdiqlash, Cancel - Bekor qilish)");
+      if (confirmed) {
         const fpId = 'fp_sim_' + Math.floor(Math.random() * 1000000);
         resolve({ success: true, fpId: fpId });
-      }, 2000);
+      } else {
+        resolve({ success: false, error: "Skaner foydalanuvchi tomonidan bekor qilindi" });
+      }
     });
   }
 }

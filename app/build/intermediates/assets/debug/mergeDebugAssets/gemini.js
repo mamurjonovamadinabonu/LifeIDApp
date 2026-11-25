@@ -1,13 +1,19 @@
 // gemini.js - Gemini AI Assistant Integration for LifeID
 class GeminiAssistant {
   constructor() {
-    this.apiKey = localStorage.getItem('gemini_api_key') || '';
+    try {
+      this.apiKey = localStorage.getItem('gemini_api_key') || '';
+    } catch(e) {
+      this.apiKey = '';
+    }
     this.model = 'gemini-1.5-flash';
   }
 
   setApiKey(key) {
     this.apiKey = key;
-    localStorage.setItem('gemini_api_key', key);
+    try {
+      localStorage.setItem('gemini_api_key', key);
+    } catch(e) {}
   }
 
   async askMedicalAssistant(prompt, patientContext = null) {
