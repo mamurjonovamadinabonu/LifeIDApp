@@ -680,15 +680,6 @@ function checkDoctorAuth() {
     closeLoginModal();
   }
 }
-    setTxt('profileName', doc.name);
-    setTxt('profileSpec', doc.spec);
-    setTxt('profileClinic', doc.clinic);
-    setVal('profileIdField', doc.id);
-  } catch (err) {
-    console.warn("checkDoctorAuth error:", err);
-    closeLoginModal();
-  }
-}
 
 function toggleLoginPin() {
   const input = document.getElementById('loginPin');
